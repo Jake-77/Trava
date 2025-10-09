@@ -1,18 +1,17 @@
 
 # Steps to Setup and Run the program
 
-First you have to create a virtual enviorment for python
-Open the terminal and input the following commands.
+## First you have to create a virtual enviorment for python. Open the terminal and input the following commands.
 
-  cd backApp
-  python -m venv venv
-  .\venv\Scripts\Activate.ps1
+  cd backApp\
+  python -m venv venv\
+  .\venv\Scripts\Activate.ps1\
   pip install -r requirements.txt
 
-Once done you can run the program using two terminals.
-On the first one you run the front end by using the command
+## Once done you can run the program using two terminals.
+### On the first one you run the front end by using the command
   yarn start
-On the other terminal you run the backend by using the command
+### On the other terminal you run the backend by using the command
   yarn start-app
 
 
