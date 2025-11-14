@@ -6,7 +6,6 @@ export default function AppointmentsPage() {
   const navigate = useNavigate();
   const [appointments, setAppointments] = useState([]);
   const [services, setServices] = useState([]);
-  const [user, setUser] = useState(getCurrentUser());
   const [filter, setFilter] = useState('all');
 
   useEffect(() => {
@@ -15,7 +14,6 @@ export default function AppointmentsPage() {
       navigate('/');
       return;
     }
-    setUser(currentUser);
     setAppointments(getAppointmentsByUserId(currentUser.id));
     setServices(getServicesByUserId(currentUser.id));
   }, [navigate]);

@@ -6,7 +6,6 @@ export default function ServiceDetailPage() {
   const navigate = useNavigate();
   const { id: serviceId } = useParams();
   const [service, setService] = useState(null);
-  const [user, setUser] = useState(getCurrentUser());
 
   useEffect(() => {
     const currentUser = getCurrentUser();
@@ -14,7 +13,6 @@ export default function ServiceDetailPage() {
       navigate('/');
       return;
     }
-    setUser(currentUser);
     const foundService = getServiceById(serviceId);
     if (!foundService || foundService.userId !== currentUser.id) {
       navigate('/services');

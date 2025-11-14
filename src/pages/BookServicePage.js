@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { getServiceById, saveAppointment, getAppointmentsByUserId } from '../lib/storage';
+import { getServiceById, saveAppointment } from '../lib/storage';
 
 export default function BookServicePage() {
   const { serviceId } = useParams();
@@ -27,9 +27,6 @@ export default function BookServicePage() {
     if (!service) return;
 
     setSubmitting(true);
-
-    // Get the service provider (user who owns the service)
-    const appointments = getAppointmentsByUserId(service.userId);
 
     const appointment = {
       id: Date.now().toString(),
