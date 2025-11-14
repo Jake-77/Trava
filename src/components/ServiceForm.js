@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { saveService, getServiceById } from '../lib/storage';
 import { getCurrentUser } from '../lib/storage';
@@ -7,12 +7,25 @@ export default function ServiceForm({ serviceId: propServiceId }) {
   const navigate = useNavigate();
   const params = useParams();
   const serviceId = propServiceId || params.id;
-  const existingService = serviceId ? getServiceById(serviceId) : null;
-  const [title, setTitle] = useState(existingService?.title || '');
-  const [description, setDescription] = useState(existingService?.description || '');
-  const [price, setPrice] = useState(existingService?.price || '');
+  const [existingService, setExistingService] = useState(null);
+  const [title, setTitle] = useState('');
+  const [description, setDescription] = useState('');
+  const [price, setPrice] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e) => {
+  useEffect(() => {
+    if (serviceId) {
+      const service = getServiceById(serviceId);
+      if (service) {
+        setExistingService(service);
+        setTitle(service.title || '');
+        setDescription(service.description || '');
+        setPrice(service.price || '');
+      }
+    }
+  }, [serviceId]);
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const user = getCurrentUser();
     if (!user) {
@@ -20,17 +33,25 @@ export default function ServiceForm({ serviceId: propServiceId }) {
       return;
     }
 
-    const service = {
-      id: existingService?.id || Date.now().toString(),
-      userId: user.id,
-      title,
-      description,
-      price,
-      createdAt: existingService?.createdAt || new Date().toISOString(),
-    };
+    setLoading(true);
+    try {
+      const service = {
+        id: existingService?.id || Date.now().toString(),
+        userId: user.id,
+        title,
+        description,
+        price,
+        createdAt: existingService?.createdAt || new Date().toISOString(),
+      };
 
-    saveService(service);
-    navigate('/services');
+      await saveService(service);
+      navigate('/services');
+    } catch (error) {
+      console.error('Error saving service:', error);
+      alert('Failed to save service. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -85,9 +106,10 @@ export default function ServiceForm({ serviceId: propServiceId }) {
           <div className="flex gap-3">
             <button
               type="submit"
-              className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors"
+              disabled={loading}
+              className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {existingService ? 'Update' : 'Add'} Service
+              {loading ? 'Saving...' : existingService ? 'Update' : 'Add'} Service
             </button>
             <button
               type="button"

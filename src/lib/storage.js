@@ -38,9 +38,9 @@ export function setCurrentUser(user) {
 
 // Service functions
 export function getServices() {
-  // if (typeof window === 'undefined') return [];
-  // const data = localStorage.getItem(SERVICES_KEY);
-  // return data ? JSON.parse(data) : [];
+  if (typeof window === 'undefined') return [];
+  const data = localStorage.getItem(SERVICES_KEY);
+  return data ? JSON.parse(data) : [];
 }
 
 export function getServicesByUserId(userId) {
@@ -48,15 +48,48 @@ export function getServicesByUserId(userId) {
   return services.filter(service => service.userId === userId);
 }
 
-export function saveService(service) {
-  const services = getServices();
-  const existingIndex = services.findIndex(s => s.id === service.id);
-  if (existingIndex >= 0) {
-    services[existingIndex] = service;
+export async function saveService(service) {
+  if (typeof window === 'undefined') return;
+
+  // Check if this is a new service (create) or existing (update)
+  const existingService = service.id ? getServiceById(service.id) : null;
+
+  // For new services, use Flask API
+  if (!existingService) {
+    try {
+      const response = await fetch('/api/services', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(service),
+      });
+
+      if (!response.ok) throw new Error('Failed to create service');
+      const createdService = await response.json();
+
+      // Save to localStorage so other parts of app can access it
+      const services = getServices();
+      services.push(createdService);
+      localStorage.setItem(SERVICES_KEY, JSON.stringify(services));
+
+      return createdService;
+    } catch (error) {
+      console.error('Error creating service:', error);
+      throw error;
+    }
   } else {
-    services.push(service);
+    // For updates, use localStorage
+    const services = getServices();
+    const existingIndex = services.findIndex(s => s.id === service.id);
+    if (existingIndex >= 0) {
+      services[existingIndex] = service;
+    } else {
+      services.push(service);
+    }
+    localStorage.setItem(SERVICES_KEY, JSON.stringify(services));
+    return service;
   }
-  localStorage.setItem(SERVICES_KEY, JSON.stringify(services));
 }
 
 export function deleteService(serviceId) {
