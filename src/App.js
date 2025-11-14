@@ -1,47 +1,39 @@
-/*
-  cd backApp
-  python -m venv venv
-  .\venv\Scripts\Activate.ps1
-  pip install -r requirements.txt
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import './globals.css';
 
-  two terminals in do
-    yarn start
-  the other do
-    yarn start-app
-
-*/
-import React, { useState, useEffect } from 'react';
-import logo from './logo.svg';
-import './App.css';
+// Pages
+import HomePage from './pages/HomePage';
+import DashboardPage from './pages/DashboardPage';
+import ServicesPage from './pages/ServicesPage';
+import ServiceDetailPage from './pages/ServiceDetailPage';
+import NewServicePage from './pages/NewServicePage';
+import EditServicePage from './pages/EditServicePage';
+import AppointmentsPage from './pages/AppointmentsPage';
+import AppointmentDetailPage from './pages/AppointmentDetailPage';
+import NewAppointmentPage from './pages/NewAppointmentPage';
+import EditAppointmentPage from './pages/EditAppointmentPage';
+import BookServicePage from './pages/BookServicePage';
+import PayAppointmentPage from './pages/PayAppointmentPage';
 
 function App() {
-
-  const [currentTime, setCurrentTime] = useState(0);
-
-  useEffect(() => {
-    fetch('/time').then(res => res.json()).then(data => {
-      setCurrentTime(data.time);
-    });
-  }, []);
-  
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-        <p>The current time is {currentTime}.</p>
-      </header>
-    </div>
+    <Router>
+      <Routes>
+        <Route path="/" element={<HomePage />} />
+        <Route path="/dashboard" element={<DashboardPage />} />
+        <Route path="/services" element={<ServicesPage />} />
+        <Route path="/services/new" element={<NewServicePage />} />
+        <Route path="/services/:id" element={<ServiceDetailPage />} />
+        <Route path="/services/:id/edit" element={<EditServicePage />} />
+        <Route path="/appointments" element={<AppointmentsPage />} />
+        <Route path="/appointments/new" element={<NewAppointmentPage />} />
+        <Route path="/appointments/:id" element={<AppointmentDetailPage />} />
+        <Route path="/appointments/:id/edit" element={<EditAppointmentPage />} />
+        <Route path="/book/:serviceId" element={<BookServicePage />} />
+        <Route path="/pay/:id" element={<PayAppointmentPage />} />
+      </Routes>
+    </Router>
   );
 }
 
