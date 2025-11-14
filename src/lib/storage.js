@@ -38,9 +38,9 @@ export function setCurrentUser(user) {
 
 // Service functions
 export function getServices() {
-  if (typeof window === 'undefined') return [];
-  const data = localStorage.getItem(SERVICES_KEY);
-  return data ? JSON.parse(data) : [];
+  // if (typeof window === 'undefined') return [];
+  // const data = localStorage.getItem(SERVICES_KEY);
+  // return data ? JSON.parse(data) : [];
 }
 
 export function getServicesByUserId(userId) {
