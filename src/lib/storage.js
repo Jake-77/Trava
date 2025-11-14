@@ -1,13 +1,51 @@
-// Basic storage utilities for services and appointments
-
+const USERS_KEY = 'trava_users';
 const SERVICES_KEY = 'trava_services';
 const APPOINTMENTS_KEY = 'trava_appointments';
+const CURRENT_USER_KEY = 'trava_current_user';
+
+// User functions
+export function getUsers() {
+  if (typeof window === 'undefined') return [];
+  const data = localStorage.getItem(USERS_KEY);
+  return data ? JSON.parse(data) : [];
+}
+
+export function saveUser(user) {
+  const users = getUsers();
+  users.push(user);
+  localStorage.setItem(USERS_KEY, JSON.stringify(users));
+}
+
+export function getUserByEmail(email) {
+  const users = getUsers();
+  return users.find(u => u.email === email);
+}
+
+export function getCurrentUser() {
+  if (typeof window === 'undefined') return null;
+  const data = localStorage.getItem(CURRENT_USER_KEY);
+  return data ? JSON.parse(data) : null;
+}
+
+export function setCurrentUser(user) {
+  if (typeof window === 'undefined') return;
+  if (user) {
+    localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(user));
+  } else {
+    localStorage.removeItem(CURRENT_USER_KEY);
+  }
+}
 
 // Service functions
 export function getServices() {
   if (typeof window === 'undefined') return [];
   const data = localStorage.getItem(SERVICES_KEY);
   return data ? JSON.parse(data) : [];
+}
+
+export function getServicesByUserId(userId) {
+  const services = getServices();
+  return services.filter(service => service.userId === userId);
 }
 
 export function saveService(service) {
@@ -39,6 +77,11 @@ export function getAppointments() {
   return data ? JSON.parse(data) : [];
 }
 
+export function getAppointmentsByUserId(userId) {
+  const appointments = getAppointments();
+  return appointments.filter(appointment => appointment.userId === userId);
+}
+
 export function saveAppointment(appointment) {
   const appointments = getAppointments();
   const existingIndex = appointments.findIndex(a => a.id === appointment.id);
@@ -48,6 +91,12 @@ export function saveAppointment(appointment) {
     appointments.push(appointment);
   }
   localStorage.setItem(APPOINTMENTS_KEY, JSON.stringify(appointments));
+}
+
+export function deleteAppointment(appointmentId) {
+  const appointments = getAppointments();
+  const filtered = appointments.filter(appointment => appointment.id !== appointmentId);
+  localStorage.setItem(APPOINTMENTS_KEY, JSON.stringify(filtered));
 }
 
 export function getAppointmentById(appointmentId) {
