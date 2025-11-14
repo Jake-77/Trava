@@ -1,9 +1,7 @@
-from flask import Flask
-from dotenv import load_dotenv
-from flask import render_template
-from flask import request, redirect, url_for, session
-import os
+from flask import Flask, jsonify, request
+from flask_cors import CORS
 import time
+
 
 #Always create the a virtual enviorment in the backApp directory to run code
 
@@ -12,21 +10,39 @@ import time
   python -m venv venv
   .\venv\Scripts\Activate.ps1
   pip install -r requirements.txt
-
   two terminals in do
-    yarn start
+    npm run start
   the other do
-    yarn start-app
-
+    npm run start-app
 """
 
 app = Flask(__name__)
+CORS(app)
 
-@app.route("/")
-def home():
+# In-memory storage for services
+services_db = []
 
-    return "this is the home page"
+@app.route('/api/services', methods=['POST'])
+def create_service():
+    """Create a new service"""
+    data = request.get_json()
 
-@app.route('/time')
-def get_current_time():
-    return {'time': time.time()}
+    # Validate required fields
+    required_fields = ['title', 'description', 'price', 'userId']
+    for field in required_fields:
+        if field not in data:
+            return jsonify({'error': f'Missing required field: {field}'}), 400
+
+    # Create service object
+    service = {
+        'id': data.get('id') or str(int(time.time() * 1000)),
+        'userId': data['userId'],
+        'title': data['title'],
+        'description': data['description'],
+        'price': data['price'],
+        'createdAt': data.get('createdAt') or time.strftime('%Y-%m-%dT%H:%M:%S.%fZ')
+    }
+
+    services_db.append(service)
+    print("Service created:", service)
+    return jsonify(service), 201
