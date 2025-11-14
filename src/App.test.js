@@ -8,7 +8,7 @@ jest.mock('./lib/storage', () => ({
 
 test('renders home page with sign up form by default', () => {
   render(<App />);
-  
+
   // Should show the sign up form on the home page
   expect(screen.getByRole('heading', { name: /sign up/i })).toBeInTheDocument();
   expect(screen.getByLabelText(/email/i)).toBeInTheDocument();
@@ -18,7 +18,7 @@ test('renders home page with sign up form by default', () => {
 
 test('renders app without crashing', () => {
   render(<App />);
-  
+
   // App should render without errors
   expect(screen.getByRole('button', { name: /sign up/i })).toBeInTheDocument();
 });
