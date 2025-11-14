@@ -6,7 +6,6 @@ export default function AppointmentDetailPage() {
   const navigate = useNavigate();
   const { id: appointmentId } = useParams();
   const [appointment, setAppointment] = useState(null);
-  const [user, setUser] = useState(getCurrentUser());
 
   useEffect(() => {
     const currentUser = getCurrentUser();
@@ -14,7 +13,6 @@ export default function AppointmentDetailPage() {
       navigate('/');
       return;
     }
-    setUser(currentUser);
     const foundAppointment = getAppointmentById(appointmentId);
     if (!foundAppointment || foundAppointment.userId !== currentUser.id) {
       navigate('/appointments');

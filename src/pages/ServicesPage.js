@@ -5,7 +5,6 @@ import { getCurrentUser, getServicesByUserId, deleteService } from '../lib/stora
 export default function ServicesPage() {
   const navigate = useNavigate();
   const [services, setServices] = useState([]);
-  const [user, setUser] = useState(getCurrentUser());
 
   useEffect(() => {
     const currentUser = getCurrentUser();
@@ -13,7 +12,6 @@ export default function ServicesPage() {
       navigate('/');
       return;
     }
-    setUser(currentUser);
     setServices(getServicesByUserId(currentUser.id));
   }, [navigate]);
 
