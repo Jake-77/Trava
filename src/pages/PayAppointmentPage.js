@@ -9,30 +9,51 @@ export default function PayAppointmentPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const foundAppointment = getAppointmentById(appointmentId);
-    if (!foundAppointment) {
-      setLoading(false);
-      return;
-    }
-    setAppointment(foundAppointment);
-    const foundService = getServiceById(foundAppointment.serviceId);
-    setService(foundService);
-    setLoading(false);
+    const fetchData = async () => {
+      try {
+        // 1. Fetch Appointment
+        const foundAppointment = getAppointmentById(appointmentId);
+        
+        if (!foundAppointment) {
+          setLoading(false);
+          return;
+        }
+        setAppointment(foundAppointment);
+
+        // 2. Fetch Service based on appointment details
+        const foundService = await getServiceById(foundAppointment.serviceId);
+        setService(foundService);
+      } catch (error) {
+        console.error("Error fetching payment details:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
   }, [appointmentId]);
 
   const handleCashPayment = () => {
     if (!appointment) return;
+    
     const updated = {
       ...appointment,
       paymentStatus: 'paid',
       paymentMethod: 'cash',
     };
-    saveAppointment(updated);
-    setAppointment(updated);
-    alert('Payment marked as cash. Thank you!');
+
+    try {
+      // Wait for backend save
+      saveAppointment(updated);
+      setAppointment(updated);
+      alert('Payment marked as cash. Thank you!');
+    } catch (error) {
+      console.error("Failed to process cash payment:", error);
+      alert('Error saving payment status.');
+    }
   };
 
   const handleStripePayment = () => {
+    if (!appointment || !service) return;
     if (!appointment || !service) return;
     // TODO: Wire up Stripe payment processing
     // This would redirect to Stripe checkout or open Stripe payment modal

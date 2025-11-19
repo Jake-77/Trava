@@ -6,27 +6,46 @@ export default function ServiceDetailPage() {
   const navigate = useNavigate();
   const { id: serviceId } = useParams();
   const [service, setService] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const currentUser = getCurrentUser();
-    if (!currentUser) {
-      navigate('/');
-      return;
-    }
-    const foundService = getServiceById(serviceId);
-    if (!foundService || foundService.userId !== currentUser.id) {
-      navigate('/services');
-      return;
-    }
-    setService(foundService);
+    const fetchData = async () => {
+      const currentUser = getCurrentUser();
+      if (!currentUser) {
+        navigate('/');
+        return;
+      }
+
+      try {
+        // Now awaited because getServiceById performs a fetch
+        const foundService = await getServiceById(serviceId);
+
+        if (!foundService || foundService.userId !== currentUser.id) {
+          navigate('/services');
+          return;
+        }
+        setService(foundService);
+      } catch (error) {
+        console.error("Failed to load service:", error);
+        navigate('/services');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
   }, [serviceId, navigate]);
 
-  if (!service) {
+  if (loading) {
     return (
       <div className="min-h-screen bg-zinc-50 dark:bg-black flex items-center justify-center">
         <p className="text-zinc-600 dark:text-zinc-400">Loading...</p>
       </div>
     );
+  }
+
+  if (!service) {
+    return null;
   }
 
   return (
@@ -41,7 +60,7 @@ export default function ServiceDetailPage() {
               {service.title}
             </h1>
             <p className="text-sm text-zinc-500 dark:text-zinc-400">
-              Created: {new Date(service.createdAt).toLocaleDateString()}
+              Created: {service.createdAt ? new Date(service.createdAt).toLocaleDateString() : 'N/A'}
             </p>
           </div>
           <div className="mb-6">
@@ -107,9 +126,10 @@ export default function ServiceDetailPage() {
               Edit Service
             </button>
             <button
-              onClick={() => {
+              // Updated to be async to wait for the backend response
+              onClick={async () => {
                 if (window.confirm('Are you sure you want to delete this service?')) {
-                  deleteService(service.id);
+                  await deleteService(service.id);
                   navigate('/services');
                 }
               }}

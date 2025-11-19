@@ -3,6 +3,19 @@ const SERVICES_KEY = 'trava_services';
 const APPOINTMENTS_KEY = 'trava_appointments';
 const CURRENT_USER_KEY = 'trava_current_user';
 
+// Helper: safely read local storage
+function readLocal(key, fallback) {
+  if (typeof window === 'undefined') return fallback;
+  const data = localStorage.getItem(key);
+  return data ? JSON.parse(data) : fallback;
+}
+
+// Helper: write local storage
+function writeLocal(key, value) {
+  if (typeof window === 'undefined') return;
+  localStorage.setItem(key, JSON.stringify(value));
+}
+
 // User functions
 export function getUsers() {
   if (typeof window === 'undefined') return [];
@@ -37,14 +50,24 @@ export function setCurrentUser(user) {
 }
 
 // Service functions
-export function getServices() {
-  if (typeof window === 'undefined') return [];
-  const data = localStorage.getItem(SERVICES_KEY);
-  return data ? JSON.parse(data) : [];
+export async function getServices() {
+  try{
+    const response = await fetch('/api/services');
+    if (!response.ok) throw new Error('Failed to fetch services');
+    const services = await response.json();
+
+    writeLocal(SERVICES_KEY, services);
+    return services;
+  } catch (error) {
+    console.error('Error fetching services from API, falling back to localStorage:', error);
+    return readLocal(SERVICES_KEY, []);
+  }
 }
 
-export function getServicesByUserId(userId) {
-  const services = getServices();
+export async function getServicesByUserId(userId) {
+
+  //leaving for now 
+  const services = await getServices();
   return services.filter(service => service.userId === userId);
 }
 
@@ -52,55 +75,94 @@ export async function saveService(service) {
   if (typeof window === 'undefined') return;
 
   // Check if this is a new service (create) or existing (update)
-  const existingService = service.id ? getServiceById(service.id) : null;
+  const existingService = service.id ? await getServiceById(service.id) : null;
+  
+  try{
+    const route = existingService ? `/api/services/${service.id}` : '/api/services';
+    const method = existingService ? 'PUT' : 'POST';
 
-  // For new services, use Flask API
-  if (!existingService) {
-    try {
-      const response = await fetch('/api/services', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(service),
-      });
+    const response = await fetch(route, {
+      method,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(service),
+    });
+    if (!response.ok) throw new Error('Failed to save service');
+    const savedService = await response.json();
 
-      if (!response.ok) throw new Error('Failed to create service');
-      const createdService = await response.json();
-
-      // Save to localStorage so other parts of app can access it
-      const services = getServices();
-      services.push(createdService);
-      localStorage.setItem(SERVICES_KEY, JSON.stringify(services));
-
-      return createdService;
-    } catch (error) {
-      console.error('Error creating service:', error);
-      throw error;
-    }
-  } else {
-    // For updates, use localStorage
-    const services = getServices();
-    const existingIndex = services.findIndex(s => s.id === service.id);
-    if (existingIndex >= 0) {
-      services[existingIndex] = service;
+    // Update localStorage
+    const services = readLocal(SERVICES_KEY, []);
+    if (existingService) {
+      const index = services.findIndex(s => s.id === savedService.id);
+      if (index >= 0) {
+        services[index] = savedService;
+      } else {
+        services.push(savedService);
+      }
     } else {
-      services.push(service);
+      services.push(savedService);
     }
-    localStorage.setItem(SERVICES_KEY, JSON.stringify(services));
-    return service;
+    writeLocal(SERVICES_KEY, services);
+
+    return savedService;
+  } catch (error) {
+    console.error('Error saving service to API, falling back to localStorage:', error);
+    const services = readLocal(SERVICES_KEY, []);
+    // Fallback to localStorage for create/update
+    if (!existingService) {
+      // Create new service
+      const createdService = {
+        ...service,
+        id: Date.now().toString() 
+      };
+      services.push(createdService);
+      return createdService; 
+    } else {
+      // Update existing service
+      const index = services.findIndex(s => s.id === service.id);
+      if (index >= 0) {
+        services[index] = service;
+      } else {
+        services.push(service);
+      }
+    }
+    writeLocal(SERVICES_KEY, services);
+    return service;              
   }
 }
 
-export function deleteService(serviceId) {
-  const services = getServices();
-  const filtered = services.filter(service => service.id !== serviceId);
-  localStorage.setItem(SERVICES_KEY, JSON.stringify(filtered));
+export async function deleteService(serviceId) {
+  try{
+    const response = await fetch(`/api/services/${serviceId}`, {
+      method: 'DELETE',
+    });
+    if (!response.ok) throw new Error('Failed to delete service');
+    const services = readLocal(SERVICES_KEY, []);
+    const filtered = services.filter(service => service.id !== serviceId);
+    writeLocal(SERVICES_KEY, filtered);
+  } catch (error) {
+    console.error('Error deleting service from API, falling back to localStorage:', error);
+    const services = readLocal(SERVICES_KEY, []);
+    const filtered = services.filter(service => service.id !== serviceId);
+    writeLocal(SERVICES_KEY, filtered);
+  }
 }
 
-export function getServiceById(serviceId) {
-  const services = getServices();
-  return services.find(service => service.id === serviceId);
+export async function getServiceById(serviceId) {
+  try {
+    // Try to get the specific service from the API
+    const response = await fetch(`/api/services/${serviceId}`);
+    if (!response.ok) throw new Error('Service not found or API error');
+    return await response.json();
+
+  } catch (error) {
+
+    console.error("API unavailable, searching local storage:", error);
+    // Fallback: Read local storage manually
+    const services = readLocal(SERVICES_KEY, []);
+    return services.find(service => service.id === serviceId);
+  }
 }
 
 // Appointment functions

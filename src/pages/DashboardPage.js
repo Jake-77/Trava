@@ -7,16 +7,33 @@ export default function DashboardPage() {
   const [user, setUser] = useState(getCurrentUser());
   const [services, setServices] = useState([]);
   const [appointments, setAppointments] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const currentUser = getCurrentUser();
-    if (!currentUser) {
-      navigate('/');
-      return;
-    }
-    setUser(currentUser);
-    setServices(getServicesByUserId(currentUser.id));
-    setAppointments(getAppointmentsByUserId(currentUser.id));
+    const fetchData = async () => {
+      const currentUser = getCurrentUser();
+      if (!currentUser) {
+        navigate('/');
+        return;
+      }
+
+      setUser(currentUser);
+
+      try {
+        // Await both asynchronous storage calls
+        const userServices = await getServicesByUserId(currentUser.id);
+        const userAppointments = getAppointmentsByUserId(currentUser.id);
+        
+        setServices(userServices);
+        setAppointments(userAppointments);
+      } catch (error) {
+        console.error("Error fetching dashboard data:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
   }, [navigate]);
 
   const pendingPayments = appointments.filter(a => a.paymentStatus === 'pending').length;

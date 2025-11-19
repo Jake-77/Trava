@@ -14,12 +14,18 @@ export default function BookServicePage() {
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
-    const foundService = getServiceById(serviceId);
-    if (!foundService) {
-      // Service not found, could show error or redirect
-      return;
-    }
-    setService(foundService);
+    const fetchService = async () => {
+      // Await the asynchronous storage function call
+      const foundService = await getServiceById(serviceId);
+      
+      if (!foundService) {
+        // Service not found, could show error or redirect
+        console.error(`Service with ID ${serviceId} not found.`);
+        return;
+      }
+      setService(foundService);
+    };
+    fetchService();
   }, [serviceId]);
 
   const handleSubmit = async (e) => {

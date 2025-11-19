@@ -19,8 +19,26 @@ import time
 app = Flask(__name__)
 CORS(app)
 
+def findItem(db, item_id):
+    for item in db:
+        if item['id'] == item_id:
+            return item
+    return None
+
 # In-memory storage for services
 services_db = []
+
+@app.route('/api/services/<service_id>', methods=['GET'])
+def get_service(service_id):
+            
+    service = findItem(services_db, service_id)
+    if not service:
+        return jsonify({'error': 'Service not found'}), 404
+    return jsonify(service), 200
+
+@app.route('/api/services', methods=['GET'])
+def get_services():
+    return jsonify(services_db), 200
 
 @app.route('/api/services', methods=['POST'])
 def create_service():
@@ -46,3 +64,24 @@ def create_service():
     services_db.append(service)
     print("Service created:", service)
     return jsonify(service), 201
+
+@app.route('/api/services/<service_id>', methods=['PUT'])
+def update_service(service_id):
+    data = request.get_json()
+    service = findItem(services_db, service_id)
+    
+    if not service:
+        return jsonify({'error': 'Service not found'}), 404
+
+    # Update fields if they exist in the payload
+    service['title'] = data.get('title', service['title'])
+    service['description'] = data.get('description', service['description'])
+    service['price'] = data.get('price', service['price'])
+    
+    return jsonify(service), 200
+
+@app.route('/api/services/<service_id>', methods=['DELETE'])
+def delete_service(service_id):
+    global services_db
+    services_db = [s for s in services_db if s['id'] != service_id]
+    return jsonify({'message': 'Service deleted'}), 200

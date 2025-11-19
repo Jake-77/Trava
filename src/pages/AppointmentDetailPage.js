@@ -47,7 +47,11 @@ export default function AppointmentDetailPage() {
     );
   }
 
-  const service = getServiceById(appointment.serviceId);
+  const fetchService = async () => {
+    // Await the asynchronous storage function call
+    return await getServiceById(appointment.serviceId);
+  };
+  const service = fetchService();
 
   return (
     <div className="min-h-screen bg-zinc-50 dark:bg-black p-4">
