@@ -6,37 +6,45 @@ export default function AppointmentDetailPage() {
   const navigate = useNavigate();
   const { id: appointmentId } = useParams();
   const [appointment, setAppointment] = useState(null);
+  const [service, setService] = useState(null);
 
   useEffect(() => {
-    const currentUser = getCurrentUser();
-    if (!currentUser) {
-      navigate('/');
-      return;
-    }
-    const foundAppointment = getAppointmentById(appointmentId);
-    if (!foundAppointment || foundAppointment.userId !== currentUser.id) {
-      navigate('/appointments');
-      return;
-    }
-    setAppointment(foundAppointment);
+    const loadData = async () => {
+      const currentUser = getCurrentUser(); // <-- Will change to await apiGetCurrentUser() when localStorage is removed
+      if (!currentUser) {
+        navigate('/');
+        return;
+      }
+
+      const foundAppointment = await getAppointmentById(appointmentId); 
+      // <-- Currently reads localStorage fallback. When localStorage is removed, this will be a pure API call
+      if (!foundAppointment || foundAppointment.userId !== currentUser.id) {
+        navigate('/appointments');
+        return;
+      }
+      setAppointment(foundAppointment);
+
+      const fetchedService = await getServiceById(foundAppointment.serviceId); 
+      // <-- Currently localStorage fallback. Will be pure API call without fallback
+      setService(fetchedService);
+    };
+
+    loadData();
   }, [appointmentId, navigate]);
 
-  const handlePayment = (method) => {
+  const handlePayment = async (method) => { // <-- add async to await save
     if (!appointment) return;
     const updated = {
       ...appointment,
       paymentStatus: 'paid',
       paymentMethod: method,
     };
-    saveAppointment(updated);
+    await saveAppointment(updated); // <-- currently writes localStorage fallback. Will be pure API call
     setAppointment(updated);
   };
 
-  const handleStripePayment = () => {
-    // Mark as paid with Stripe
-    // In the future, this could verify payment via Stripe webhook
-    // For now, service provider marks it as paid when customer confirms payment
-    handlePayment('stripe');
+  const handleStripePayment = async () => {
+    await handlePayment('stripe');
   };
 
   if (!appointment) {
@@ -46,8 +54,6 @@ export default function AppointmentDetailPage() {
       </div>
     );
   }
-
-  const service = getServiceById(appointment.serviceId);
 
   return (
     <div className="min-h-screen bg-zinc-50 dark:bg-black p-4">
@@ -162,9 +168,9 @@ export default function AppointmentDetailPage() {
               Edit Appointment
             </button>
             <button
-              onClick={() => {
+              onClick={async () => { // <-- add async to await delete
                 if (window.confirm('Are you sure you want to delete this appointment?')) {
-                  deleteAppointment(appointment.id);
+                  await deleteAppointment(appointment.id); // <-- currently localStorage fallback, will be pure API
                   navigate('/appointments');
                 }
               }}

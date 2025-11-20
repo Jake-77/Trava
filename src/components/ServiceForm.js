@@ -14,15 +14,21 @@ export default function ServiceForm({ serviceId: propServiceId }) {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (serviceId) {
-      const service = getServiceById(serviceId);
-      if (service) {
-        setExistingService(service);
-        setTitle(service.title || '');
-        setDescription(service.description || '');
-        setPrice(service.price || '');
+    if (!serviceId) return;
+    const loadService = async () => {
+      try{
+        const service = await getServiceById(serviceId);
+        if (service) {
+          setExistingService(service);
+          setTitle(service.title || '');
+          setDescription(service.description || '');
+          setPrice(service.price || '');
+        }
+      } catch (error) {
+        console.error('Error loading service:', error);
       }
-    }
+    }; 
+    loadService()
   }, [serviceId]);
 
   const handleSubmit = async (e) => {

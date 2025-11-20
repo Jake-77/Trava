@@ -12,12 +12,14 @@ export default function ServicesPage() {
       navigate('/');
       return;
     }
-    setServices(getServicesByUserId(currentUser.id));
+    getServicesByUserId(currentUser.id).then((userServices) => {
+      setServices(userServices);
+    });
   }, [navigate]);
 
-  const handleDelete = (serviceId) => {
+  const handleDelete = async (serviceId) => {
     if (window.confirm('Are you sure you want to delete this service?')) {
-      deleteService(serviceId);
+      await deleteService(serviceId);
       setServices(services.filter(service => service.id !== serviceId));
     }
   };

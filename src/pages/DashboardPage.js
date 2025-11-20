@@ -1,22 +1,44 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getCurrentUser, getServicesByUserId, getAppointmentsByUserId, setCurrentUser } from '../lib/storage';
+import { getCurrentUser, setCurrentUser, getServicesByUserId, getAppointmentsByUserId } from '../lib/storage';
 
 export default function DashboardPage() {
   const navigate = useNavigate();
-  const [user, setUser] = useState(getCurrentUser());
+  const [user, setUser] = useState(getCurrentUser()); 
+  // BREAKS without localStorage: getCurrentUser() reads from localStorage.
+  // Replace with a backend call like: const currentUser = await fetch('/api/current_user').then(res => res.json());
+
   const [services, setServices] = useState([]);
   const [appointments, setAppointments] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const currentUser = getCurrentUser();
-    if (!currentUser) {
-      navigate('/');
-      return;
-    }
-    setUser(currentUser);
-    setServices(getServicesByUserId(currentUser.id));
-    setAppointments(getAppointmentsByUserId(currentUser.id));
+    const fetchData = async () => {
+      const currentUser = getCurrentUser(); 
+      // BREAKS without localStorage: same as above.
+      if (!currentUser) {
+        navigate('/');
+        return;
+      }
+
+      setUser(currentUser);
+
+      try {
+        const userServices = await getServicesByUserId(currentUser.id); 
+        // OK with backend, works as-is
+        const userAppointments = await getAppointmentsByUserId(currentUser.id); 
+        // OK with backend, works as-is
+        
+        setServices(userServices);
+        setAppointments(userAppointments);
+      } catch (error) {
+        console.error("Error fetching dashboard data:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
   }, [navigate]);
 
   const pendingPayments = appointments.filter(a => a.paymentStatus === 'pending').length;
@@ -32,9 +54,19 @@ export default function DashboardPage() {
     }, 0);
 
   const handleLogout = () => {
-    setCurrentUser(null);
+    setCurrentUser(null); 
+    // BREAKS without localStorage: removes user from localStorage. 
+    // Replace with backend logout API call: await fetch('/api/logout', { method: 'POST' });
     navigate('/');
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-zinc-50 dark:bg-black">
+        <p className="text-zinc-600 dark:text-zinc-400">Loading...</p>
+      </div>
+    );
+  }
 
   if (!user) return null;
 

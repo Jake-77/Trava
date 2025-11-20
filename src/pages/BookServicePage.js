@@ -14,12 +14,16 @@ export default function BookServicePage() {
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
-    const foundService = getServiceById(serviceId);
-    if (!foundService) {
-      // Service not found, could show error or redirect
-      return;
-    }
-    setService(foundService);
+    const fetchService = async () => {
+      const foundService = await getServiceById(serviceId); 
+      // <-- Currently reads localStorage if missing API, will become pure API call when localStorage removed
+      if (!foundService) {
+        console.error(`Service with ID ${serviceId} not found.`);
+        return;
+      }
+      setService(foundService);
+    };
+    fetchService();
   }, [serviceId]);
 
   const handleSubmit = async (e) => {
@@ -43,9 +47,9 @@ export default function BookServicePage() {
       createdAt: new Date().toISOString(),
     };
 
-    saveAppointment(appointment);
+    await saveAppointment(appointment); 
+    // <-- Currently writes to localStorage, will become API POST call when localStorage removed
 
-    // Show success message
     alert('Appointment booked successfully! You will receive a confirmation.');
 
     // Reset form
@@ -66,7 +70,6 @@ export default function BookServicePage() {
     );
   }
 
-  // Set minimum date to today
   const today = new Date().toISOString().split('T')[0];
 
   return (
@@ -100,6 +103,7 @@ export default function BookServicePage() {
                 placeholder="John Doe"
               />
             </div>
+
             <div>
               <label htmlFor="customerPhone" className="block text-sm font-medium mb-2">
                 Phone Number *
@@ -114,6 +118,7 @@ export default function BookServicePage() {
                 placeholder="(555) 123-4567"
               />
             </div>
+
             <div>
               <label htmlFor="customerEmail" className="block text-sm font-medium mb-2">
                 Email
@@ -127,6 +132,7 @@ export default function BookServicePage() {
                 placeholder="john@example.com"
               />
             </div>
+
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label htmlFor="date" className="block text-sm font-medium mb-2">
@@ -156,6 +162,7 @@ export default function BookServicePage() {
                 />
               </div>
             </div>
+
             <div>
               <label htmlFor="notes" className="block text-sm font-medium mb-2">
                 Notes (optional)
@@ -169,6 +176,7 @@ export default function BookServicePage() {
                 placeholder="Any special requests or notes..."
               />
             </div>
+
             <button
               type="submit"
               disabled={submitting}

@@ -9,27 +9,50 @@ export default function PayAppointmentPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const foundAppointment = getAppointmentById(appointmentId);
-    if (!foundAppointment) {
-      setLoading(false);
-      return;
-    }
-    setAppointment(foundAppointment);
-    const foundService = getServiceById(foundAppointment.serviceId);
-    setService(foundService);
-    setLoading(false);
+    const fetchData = async () => {
+      try {
+        // getAppointmentById currently uses localStorage fallback
+        // If localStorage is removed, this must be awaited and rely purely on API
+        const foundAppointment = await getAppointmentById(appointmentId);
+        
+        if (!foundAppointment) {
+          setLoading(false);
+          return;
+        }
+        setAppointment(foundAppointment);
+
+        // getServiceById currently uses localStorage fallback
+        // If localStorage is removed, this must rely purely on API
+        const foundService = await getServiceById(foundAppointment.serviceId);
+        setService(foundService);
+      } catch (error) {
+        console.error("Error fetching payment details:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
   }, [appointmentId]);
 
-  const handleCashPayment = () => {
+  const handleCashPayment = async () => {
     if (!appointment) return;
+    
     const updated = {
       ...appointment,
       paymentStatus: 'paid',
       paymentMethod: 'cash',
     };
-    saveAppointment(updated);
-    setAppointment(updated);
-    alert('Payment marked as cash. Thank you!');
+
+    try {
+      // saveAppointment uses localStorage fallback
+      // If localStorage is removed, rely purely on API
+      await saveAppointment(updated);
+      setAppointment(updated);
+      alert('Payment marked as cash. Thank you!');
+    } catch (error) {
+      console.error("Failed to process cash payment:", error);
+      alert('Error saving payment status.');
+    }
   };
 
   const handleStripePayment = () => {
@@ -67,7 +90,6 @@ export default function PayAppointmentPage() {
     );
   }
 
-  // If already paid, show confirmation
   if (appointment.paymentStatus === 'paid') {
     return (
       <div className="min-h-screen bg-zinc-50 dark:bg-black p-4">

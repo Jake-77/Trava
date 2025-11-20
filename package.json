@@ -21,6 +21,7 @@
   "scripts": {
     "start": "react-scripts start",
     "start-app": "cd backApp && venv/bin/python -m flask run --no-debugger",
+    "start-app2": "cd backApp && venv\\Scripts\\python.exe -m flask run --no-debugger",
     "postinstall": "cd backApp && venv/bin/python -m pip install -r requirements.txt",
     "build": "react-scripts build",
     "test": "react-scripts test",
