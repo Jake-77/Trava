@@ -8,15 +8,28 @@ export default function EditAppointmentPage() {
   const { id: appointmentId } = useParams();
 
   useEffect(() => {
-    const user = getCurrentUser();
-    if (!user) {
-      navigate('/');
-      return;
-    }
-    const appointment = getAppointmentById(appointmentId);
-    if (!appointment || appointment.userId !== user.id) {
-      navigate('/appointments');
-    }
+    const fetchAppointment = async () => {
+      const user = getCurrentUser(); // ⚠️ Depends on localStorage; if removed, use apiGetCurrentUser()
+      if (!user) {
+        navigate('/');
+        return;
+      }
+
+      try {
+        // Fetch appointment using backend first, localStorage fallback if API fails
+        const data = await getAppointmentById(appointmentId); // ⚠️ Previously synchronous; must now await
+        if (!data || data.userId !== user.id) {
+          navigate('/appointments');
+          return;
+        }
+        
+      } catch (err) {
+        console.error('Failed to fetch appointment:', err);
+        navigate('/appointments');
+      } 
+    };
+
+    fetchAppointment();
   }, [appointmentId, navigate]);
 
   return (

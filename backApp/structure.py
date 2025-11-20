@@ -1,5 +1,6 @@
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, session
 from flask_cors import CORS
+from werkzeug.security import generate_password_hash, check_password_hash
 import time
 
 
@@ -17,7 +18,8 @@ import time
 """
 
 app = Flask(__name__)
-CORS(app)
+app.secret_key = 'development-key' #hide in production
+CORS(app, supports_credentials=True)
 
 def findItem(db, item_id):
     for item in db:
@@ -27,6 +29,61 @@ def findItem(db, item_id):
 
 # In-memory storage for services
 services_db = []
+appointments_db = []
+users_db = {}
+
+@app.post("/api/auth/signup")
+def signup():
+    data = request.json
+    email = data["email"].lower()
+    password = data["password"]
+
+    if email in users_db:
+        return jsonify({"error": "Email already exists"}), 400
+
+    users_db[email] = {
+        "id": str(len(users_db) + 1),
+        "email": email,
+        "password_hash": generate_password_hash(password),
+        "createdAt": time.strftime('%Y-%m-%dT%H:%M:%S.%fZ')
+    }
+
+    # create session
+    session["user_email"] = email
+
+    return jsonify({"id": users_db[email]["id"], "email": email}), 200
+
+
+@app.post("/api/auth/login")
+def login():
+    data = request.json
+    email = data["email"].lower()
+    password = data["password"]
+
+    user = users_db.get(email)
+    if not user or not check_password_hash(user["password_hash"], password):
+        return jsonify({"error": "Invalid email or password"}), 401
+
+    session["user_email"] = email
+
+    return jsonify({"id": user["id"], "email": user["email"]}), 200
+
+
+@app.get("/api/auth/me")
+def me():
+    email = session.get("user_email")
+    if not email or email not in users_db:
+        return jsonify({"user": None}), 200
+
+    user = users_db[email]
+    return jsonify({"id": user["id"], "email": user["email"]}), 200
+
+
+@app.post("/api/auth/logout")
+def logout():
+    session.clear()
+    return jsonify({"message": "logged out"}), 200
+
 
 @app.route('/api/services/<service_id>', methods=['GET'])
 def get_service(service_id):
@@ -85,3 +142,58 @@ def delete_service(service_id):
     global services_db
     services_db = [s for s in services_db if s['id'] != service_id]
     return jsonify({'message': 'Service deleted'}), 200
+
+@app.route('/api/appointments/<appointment_id>', methods=['GET'])
+def get_appointment(appointment_id):
+    appointment = findItem(appointments_db, appointment_id)
+    if not appointment:
+        return jsonify({'error': 'Appointment not found'}), 404
+    return jsonify(appointment), 200
+
+@app.route('/api/appointments', methods=['GET'])
+def get_appointments():
+    return jsonify(appointments_db), 200
+
+@app.route('/api/appointments', methods=['POST'])
+def create_appointment():
+    data = request.get_json()
+
+    required_fields = ['userId', 'serviceId', 'date', 'time']
+    for field in required_fields:
+        if field not in data:
+            return jsonify({'error': f'Missing required field: {field}'}), 400
+
+    appointment = {
+        'id': data.get('id') or str(int(time.time() * 1000)),
+        'userId': data['userId'],
+        'serviceId': data['serviceId'],
+        'date': data['date'],
+        'time': data['time'],
+        'notes': data.get('notes', ''),
+        'createdAt': data.get('createdAt') or time.strftime('%Y-%m-%dT%H:%M:%S.%fZ')
+    }
+
+    appointments_db.append(appointment)
+    print("Appointment created:", appointment)
+    return jsonify(appointment), 201
+
+@app.route('/api/appointments/<appointment_id>', methods=['PUT'])
+def update_appointment(appointment_id):
+    data = request.get_json()
+    appointment = findItem(appointments_db, appointment_id)
+
+    if not appointment:
+        return jsonify({'error': 'Appointment not found'}), 404
+
+    appointment['date'] = data.get('date', appointment['date'])
+    appointment['time'] = data.get('time', appointment['time'])
+    appointment['notes'] = data.get('notes', appointment['notes'])
+    
+    return jsonify(appointment), 200
+
+@app.route('/api/appointments/<appointment_id>', methods=['DELETE'])
+def delete_appointment(appointment_id):
+    global appointments_db
+    appointments_db = [a for a in appointments_db if a['id'] != appointment_id]
+    return jsonify({'message': 'Appointment deleted'}), 200
+

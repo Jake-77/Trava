@@ -1,41 +1,59 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { saveUser, getUserByEmail, setCurrentUser } from '../lib/storage';
+import { saveUser, getUserByEmail, setCurrentUser, apiSignup, apiLogin } from '../lib/storage';
 
-export default function AuthForm() {
+export default function AuthForm({ apiMode = false }) {
   const [isSignUp, setIsSignUp] = useState(true);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
 
-    if (isSignUp) {
-      // Sign up
-      if (getUserByEmail(email)) {
-        setError('Email already exists');
-        return;
+    try {
+      const trimmedEmail = email.trim().toLowerCase();
+      const trimmedPassword = password.trim();
+      let user;
+
+      if (apiMode) {
+        // Use backend API
+        if (isSignUp) {
+          user = await apiSignup(trimmedEmail, trimmedPassword);
+        } else {
+          user = await apiLogin(trimmedEmail, trimmedPassword);
+        }
+      } else {
+        // LocalStorage mode
+        if (isSignUp) {
+          const existingUser = await getUserByEmail(trimmedEmail);
+          if (existingUser) {
+            setError('Email already exists');
+            return;
+          }
+          const newUser = {
+            email: trimmedEmail,
+            password: trimmedPassword,
+          };
+          user = await saveUser(newUser); // make sure saveUser returns the saved user
+          setCurrentUser(user);
+        } else {
+          user = await getUserByEmail(trimmedEmail);
+          if (!user || user.password !== trimmedPassword) {
+            setError('Invalid email or password');
+            return;
+          }
+          setCurrentUser(user);
+        }
       }
-      const newUser = {
-        id: Date.now().toString(),
-        email,
-        password, // In production, hash this
-      };
-      saveUser(newUser);
-      setCurrentUser(newUser);
+
       navigate('/dashboard');
-    } else {
-      // Login
-      const user = getUserByEmail(email);
-      if (!user || user.password !== password) {
-        setError('Invalid email or password');
-        return;
-      }
-      setCurrentUser(user);
-      navigate('/dashboard');
+
+    } catch (err) {
+      console.error(err);
+      setError(err.message || 'Something went wrong. Please try again.');
     }
   };
 
@@ -47,9 +65,7 @@ export default function AuthForm() {
         </h1>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label htmlFor="email" className="block text-sm font-medium mb-2">
-              Email
-            </label>
+            <label htmlFor="email" className="block text-sm font-medium mb-2">Email</label>
             <input
               id="email"
               type="email"
@@ -61,9 +77,7 @@ export default function AuthForm() {
             />
           </div>
           <div>
-            <label htmlFor="password" className="block text-sm font-medium mb-2">
-              Password
-            </label>
+            <label htmlFor="password" className="block text-sm font-medium mb-2">Password</label>
             <input
               id="password"
               type="password"
@@ -74,9 +88,7 @@ export default function AuthForm() {
               placeholder="••••••••"
             />
           </div>
-          {error && (
-            <div className="text-red-500 text-sm text-center">{error}</div>
-          )}
+          {error && <div className="text-red-500 text-sm text-center">{error}</div>}
           <button
             type="submit"
             className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors"

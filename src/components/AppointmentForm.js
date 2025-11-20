@@ -1,39 +1,68 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { saveAppointment, getAppointmentById, getServicesByUserId } from '../lib/storage';
-import { getCurrentUser } from '../lib/storage';
+import { saveAppointment, getAppointmentById, getServicesByUserId, getCurrentUser } from '../lib/storage';
 
 export default function AppointmentForm({ appointmentId: propAppointmentId }) {
   const navigate = useNavigate();
   const params = useParams();
   const appointmentId = propAppointmentId || params.id;
+
   const [user, setUser] = useState(getCurrentUser());
-  const existingAppointment = appointmentId ? getAppointmentById(appointmentId) : null;
+  const [existingAppointment, setExistingAppointment] = useState(null);
   const [services, setServices] = useState([]);
 
-  const [serviceId, setServiceId] = useState(existingAppointment?.serviceId || '');
-  const [customerName, setCustomerName] = useState(existingAppointment?.customerName || '');
-  const [customerPhone, setCustomerPhone] = useState(existingAppointment?.customerPhone || '');
-  const [customerEmail, setCustomerEmail] = useState(existingAppointment?.customerEmail || '');
-  const [date, setDate] = useState(existingAppointment?.date || '');
-  const [time, setTime] = useState(existingAppointment?.time || '');
-  const [status, setStatus] = useState(existingAppointment?.status || 'scheduled');
-  const [paymentMethod, setPaymentMethod] = useState(existingAppointment?.paymentMethod || '');
-  const [paymentStatus, setPaymentStatus] = useState(existingAppointment?.paymentStatus || 'pending');
-  const [notes, setNotes] = useState(existingAppointment?.notes || '');
+  const [serviceId, setServiceId] = useState('');
+  const [customerName, setCustomerName] = useState('');
+  const [customerPhone, setCustomerPhone] = useState('');
+  const [customerEmail, setCustomerEmail] = useState('');
+  const [date, setDate] = useState('');
+  const [time, setTime] = useState('');
+  const [status, setStatus] = useState('scheduled');
+  const [paymentMethod, setPaymentMethod] = useState('');
+  const [paymentStatus, setPaymentStatus] = useState('pending');
+  const [notes, setNotes] = useState('');
 
+  // ---- LOAD USER + SERVICES + EXISTING APPOINTMENT ----
   useEffect(() => {
-    const currentUser = getCurrentUser();
-    if (!currentUser) {
-      navigate('/');
-      return;
-    }
-    setUser(currentUser);
-    setServices(getServicesByUserId(currentUser.id));
-  }, [navigate]);
+    const loadData = async () => {
+      const currentUser = getCurrentUser();
+      if (!currentUser) {
+        navigate('/');
+        return;
+      }
 
-  const handleSubmit = (e) => {
+      setUser(currentUser);
+
+      // Load user services
+      const userServices = await getServicesByUserId(currentUser.id);
+      setServices(userServices || []);
+
+      // Load existing appointment if editing
+      if (appointmentId) {
+        const appt = await getAppointmentById(appointmentId);
+        if (appt) {
+          setExistingAppointment(appt);
+          setServiceId(appt.serviceId || '');
+          setCustomerName(appt.customerName || '');
+          setCustomerPhone(appt.customerPhone || '');
+          setCustomerEmail(appt.customerEmail || '');
+          setDate(appt.date || '');
+          setTime(appt.time || '');
+          setStatus(appt.status || 'scheduled');
+          setPaymentMethod(appt.paymentMethod || '');
+          setPaymentStatus(appt.paymentStatus || 'pending');
+          setNotes(appt.notes || '');
+        }
+      }
+    };
+
+    loadData();
+  }, [appointmentId, navigate]);
+
+  // submit
+  const handleSubmit = async (e) => {
     e.preventDefault();
+
     if (!user) {
       navigate('/');
       return;
@@ -55,13 +84,11 @@ export default function AppointmentForm({ appointmentId: propAppointmentId }) {
       createdAt: existingAppointment?.createdAt || new Date().toISOString(),
     };
 
-    saveAppointment(appointment);
+    await saveAppointment(appointment);
     navigate('/appointments');
   };
 
-  if (!user) {
-    return null;
-  }
+  if (!user) return null;
 
   const hasServices = services.length > 0;
 
@@ -71,14 +98,24 @@ export default function AppointmentForm({ appointmentId: propAppointmentId }) {
         <h1 className="text-2xl font-bold mb-6">
           {existingAppointment ? 'Edit Appointment' : 'New Appointment'}
         </h1>
+
         {!hasServices && (
           <div className="mb-4 p-3 bg-yellow-100 dark:bg-yellow-900 border border-yellow-400 dark:border-yellow-700 rounded-lg">
             <p className="text-sm text-yellow-800 dark:text-yellow-200">
-              You need to add at least one service first. <button type="button" onClick={() => navigate('/services/new')} className="underline font-medium">Add Service</button>
+              You need to add at least one service first.{' '}
+              <button
+                type="button"
+                onClick={() => navigate('/services/new')}
+                className="underline font-medium"
+              >
+                Add Service
+              </button>
             </p>
           </div>
         )}
+
         <form onSubmit={handleSubmit} className="space-y-4">
+
           <div>
             <label htmlFor="serviceId" className="block text-sm font-medium mb-2">
               Service
@@ -98,6 +135,7 @@ export default function AppointmentForm({ appointmentId: propAppointmentId }) {
               ))}
             </select>
           </div>
+
           <div>
             <label htmlFor="customerName" className="block text-sm font-medium mb-2">
               Customer Name
@@ -112,6 +150,7 @@ export default function AppointmentForm({ appointmentId: propAppointmentId }) {
               placeholder="John Doe"
             />
           </div>
+
           <div>
             <label htmlFor="customerPhone" className="block text-sm font-medium mb-2">
               Phone
@@ -126,6 +165,7 @@ export default function AppointmentForm({ appointmentId: propAppointmentId }) {
               placeholder="(555) 123-4567"
             />
           </div>
+
           <div>
             <label htmlFor="customerEmail" className="block text-sm font-medium mb-2">
               Email
@@ -139,6 +179,7 @@ export default function AppointmentForm({ appointmentId: propAppointmentId }) {
               placeholder="john@example.com"
             />
           </div>
+
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label htmlFor="date" className="block text-sm font-medium mb-2">
@@ -167,6 +208,7 @@ export default function AppointmentForm({ appointmentId: propAppointmentId }) {
               />
             </div>
           </div>
+
           <div>
             <label htmlFor="status" className="block text-sm font-medium mb-2">
               Status
@@ -183,6 +225,7 @@ export default function AppointmentForm({ appointmentId: propAppointmentId }) {
               <option value="cancelled">Cancelled</option>
             </select>
           </div>
+
           <div>
             <label htmlFor="paymentStatus" className="block text-sm font-medium mb-2">
               Payment Status
@@ -198,6 +241,7 @@ export default function AppointmentForm({ appointmentId: propAppointmentId }) {
               <option value="paid">Paid</option>
             </select>
           </div>
+
           {paymentStatus === 'paid' && (
             <div>
               <label htmlFor="paymentMethod" className="block text-sm font-medium mb-2">
@@ -215,6 +259,7 @@ export default function AppointmentForm({ appointmentId: propAppointmentId }) {
               </select>
             </div>
           )}
+
           <div>
             <label htmlFor="notes" className="block text-sm font-medium mb-2">
               Notes
@@ -228,6 +273,7 @@ export default function AppointmentForm({ appointmentId: propAppointmentId }) {
               placeholder="Additional notes..."
             />
           </div>
+
           <div className="flex gap-3">
             <button
               type="submit"
@@ -243,6 +289,7 @@ export default function AppointmentForm({ appointmentId: propAppointmentId }) {
               Cancel
             </button>
           </div>
+
         </form>
       </div>
     </div>

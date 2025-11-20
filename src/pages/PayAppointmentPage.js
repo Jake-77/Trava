@@ -11,8 +11,9 @@ export default function PayAppointmentPage() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // 1. Fetch Appointment
-        const foundAppointment = getAppointmentById(appointmentId);
+        // getAppointmentById currently uses localStorage fallback
+        // If localStorage is removed, this must be awaited and rely purely on API
+        const foundAppointment = await getAppointmentById(appointmentId);
         
         if (!foundAppointment) {
           setLoading(false);
@@ -20,7 +21,8 @@ export default function PayAppointmentPage() {
         }
         setAppointment(foundAppointment);
 
-        // 2. Fetch Service based on appointment details
+        // getServiceById currently uses localStorage fallback
+        // If localStorage is removed, this must rely purely on API
         const foundService = await getServiceById(foundAppointment.serviceId);
         setService(foundService);
       } catch (error) {
@@ -32,7 +34,7 @@ export default function PayAppointmentPage() {
     fetchData();
   }, [appointmentId]);
 
-  const handleCashPayment = () => {
+  const handleCashPayment = async () => {
     if (!appointment) return;
     
     const updated = {
@@ -42,8 +44,9 @@ export default function PayAppointmentPage() {
     };
 
     try {
-      // Wait for backend save
-      saveAppointment(updated);
+      // saveAppointment uses localStorage fallback
+      // If localStorage is removed, rely purely on API
+      await saveAppointment(updated);
       setAppointment(updated);
       alert('Payment marked as cash. Thank you!');
     } catch (error) {
@@ -53,7 +56,6 @@ export default function PayAppointmentPage() {
   };
 
   const handleStripePayment = () => {
-    if (!appointment || !service) return;
     if (!appointment || !service) return;
     // TODO: Wire up Stripe payment processing
     // This would redirect to Stripe checkout or open Stripe payment modal
@@ -88,7 +90,6 @@ export default function PayAppointmentPage() {
     );
   }
 
-  // If already paid, show confirmation
   if (appointment.paymentStatus === 'paid') {
     return (
       <div className="min-h-screen bg-zinc-50 dark:bg-black p-4">

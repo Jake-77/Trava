@@ -9,18 +9,31 @@ export default function AppointmentsPage() {
   const [filter, setFilter] = useState('all');
 
   useEffect(() => {
-    const currentUser = getCurrentUser();
-    if (!currentUser) {
-      navigate('/');
-      return;
-    }
-    setAppointments(getAppointmentsByUserId(currentUser.id));
-    setServices(getServicesByUserId(currentUser.id));
+    const loadData = async () => {
+      const currentUser = getCurrentUser(); 
+      // <-- Will change to await apiGetCurrentUser() when localStorage is removed
+
+      if (!currentUser) {
+        navigate('/');
+        return;
+      }
+
+      const userAppointments = await getAppointmentsByUserId(currentUser.id); 
+      // <-- Currently reads localStorage fallback. Will be pure API call later
+      setAppointments(userAppointments);
+
+      const userServices = await getServicesByUserId(currentUser.id); 
+      // <-- Currently reads localStorage fallback. Will be pure API call later
+      setServices(userServices);
+    };
+
+    loadData();
   }, [navigate]);
 
-  const handleDelete = (appointmentId) => {
+  const handleDelete = async (appointmentId) => { // <-- add async
     if (window.confirm('Are you sure you want to delete this appointment?')) {
-      deleteAppointment(appointmentId);
+      await deleteAppointment(appointmentId); 
+      // <-- currently localStorage fallback. Will be pure API call later
       setAppointments(appointments.filter(appointment => appointment.id !== appointmentId));
     }
   };

@@ -1,17 +1,21 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getCurrentUser, getServicesByUserId, getAppointmentsByUserId, setCurrentUser } from '../lib/storage';
+import { getCurrentUser, setCurrentUser, getServicesByUserId, getAppointmentsByUserId } from '../lib/storage';
 
 export default function DashboardPage() {
   const navigate = useNavigate();
-  const [user, setUser] = useState(getCurrentUser());
+  const [user, setUser] = useState(getCurrentUser()); 
+  // BREAKS without localStorage: getCurrentUser() reads from localStorage.
+  // Replace with a backend call like: const currentUser = await fetch('/api/current_user').then(res => res.json());
+
   const [services, setServices] = useState([]);
   const [appointments, setAppointments] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchData = async () => {
-      const currentUser = getCurrentUser();
+      const currentUser = getCurrentUser(); 
+      // BREAKS without localStorage: same as above.
       if (!currentUser) {
         navigate('/');
         return;
@@ -20,9 +24,10 @@ export default function DashboardPage() {
       setUser(currentUser);
 
       try {
-        // Await both asynchronous storage calls
-        const userServices = await getServicesByUserId(currentUser.id);
-        const userAppointments = getAppointmentsByUserId(currentUser.id);
+        const userServices = await getServicesByUserId(currentUser.id); 
+        // OK with backend, works as-is
+        const userAppointments = await getAppointmentsByUserId(currentUser.id); 
+        // OK with backend, works as-is
         
         setServices(userServices);
         setAppointments(userAppointments);
@@ -49,9 +54,19 @@ export default function DashboardPage() {
     }, 0);
 
   const handleLogout = () => {
-    setCurrentUser(null);
+    setCurrentUser(null); 
+    // BREAKS without localStorage: removes user from localStorage. 
+    // Replace with backend logout API call: await fetch('/api/logout', { method: 'POST' });
     navigate('/');
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-zinc-50 dark:bg-black">
+        <p className="text-zinc-600 dark:text-zinc-400">Loading...</p>
+      </div>
+    );
+  }
 
   if (!user) return null;
 
