@@ -1,16 +1,19 @@
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getCurrentUser } from '../lib/storage';
+import { apiGetCurrentUser } from '../lib/storage';
 import AppointmentForm from '../components/AppointmentForm';
 
 export default function NewAppointmentPage() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const user = getCurrentUser();
-    if (!user) {
-      navigate('/');
-    }
+    const newApp = async () => {
+      const user = await apiGetCurrentUser();
+      if (!user.user) {
+        navigate('/');
+      }
+    };
+    newApp();
   }, [navigate]);
 
   return (

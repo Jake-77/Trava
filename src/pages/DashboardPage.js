@@ -1,63 +1,58 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getCurrentUser, setCurrentUser, getServicesByUserId, getAppointmentsByUserId } from '../lib/storage';
+import { apiGetCurrentUser, apiLogout, getServices, getAppointments } from '../lib/storage';
 
 export default function DashboardPage() {
   const navigate = useNavigate();
-  const [user, setUser] = useState(getCurrentUser()); 
-  // BREAKS without localStorage: getCurrentUser() reads from localStorage.
-  // Replace with a backend call like: const currentUser = await fetch('/api/current_user').then(res => res.json());
-
+  const [user, setUser] = useState(null); 
   const [services, setServices] = useState([]);
   const [appointments, setAppointments] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchData = async () => {
-      const currentUser = getCurrentUser(); 
-      // BREAKS without localStorage: same as above.
+    const loadDashboard = async () => {
+      // Fetch user from backend session
+      const res = await apiGetCurrentUser();
+      const currentUser = res.user;
+
       if (!currentUser) {
-        navigate('/');
+        navigate("/");
         return;
       }
 
       setUser(currentUser);
 
       try {
-        const userServices = await getServicesByUserId(currentUser.id); 
-        // OK with backend, works as-is
-        const userAppointments = await getAppointmentsByUserId(currentUser.id); 
-        // OK with backend, works as-is
-        
+        // Already filtered by logged-in user on backend
+        const userServices = await getServices();
+        const userAppointments = await getAppointments();
+
         setServices(userServices);
         setAppointments(userAppointments);
-      } catch (error) {
-        console.error("Error fetching dashboard data:", error);
-      } finally {
-        setLoading(false);
+      } catch (err) {
+        console.error("Error loading dashboard:", err);
       }
+
+      setLoading(false);
     };
 
-    fetchData();
+    loadDashboard();
   }, [navigate]);
 
-  const pendingPayments = appointments.filter(a => a.paymentStatus === 'pending').length;
+  const pendingPayments = appointments.filter(
+    (a) => a.paymentStatus === "pending"
+  ).length;
+
   const totalRevenue = appointments
-    .filter(a => a.paymentStatus === 'paid')
+    .filter((a) => a.paymentStatus === "paid")
     .reduce((sum, a) => {
-      const service = services.find(s => s.id === a.serviceId);
-      if (service) {
-        const price = parseFloat(service.price.replace(/[^0-9.]/g, '')) || 0;
-        return sum + price;
-      }
-      return sum;
+      const service = services.find((s) => s.id == a.serviceId);
+      return service ? sum + Number(service.price) : sum;
     }, 0);
 
-  const handleLogout = () => {
-    setCurrentUser(null); 
-    // BREAKS without localStorage: removes user from localStorage. 
-    // Replace with backend logout API call: await fetch('/api/logout', { method: 'POST' });
-    navigate('/');
+  const handleLogout = async () => {
+    await apiLogout();
+    navigate("/");
   };
 
   if (loading) {
@@ -69,6 +64,7 @@ export default function DashboardPage() {
   }
 
   if (!user) return null;
+
 
   return (
     <div className="min-h-screen bg-zinc-50 dark:bg-black p-4">

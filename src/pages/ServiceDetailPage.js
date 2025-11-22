@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
-import { getCurrentUser, getServiceById, deleteService } from '../lib/storage';
+import { apiGetCurrentUser, getServiceById, deleteService } from '../lib/storage';
 
 export default function ServiceDetailPage() {
   const navigate = useNavigate();
@@ -10,7 +10,7 @@ export default function ServiceDetailPage() {
 
   useEffect(() => {
     const fetchData = async () => {
-      const currentUser = getCurrentUser();
+      const currentUser = await apiGetCurrentUser();
       if (!currentUser) {
         navigate('/');
         return;

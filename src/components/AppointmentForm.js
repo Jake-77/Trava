@@ -1,13 +1,13 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { saveAppointment, getAppointmentById, getServicesByUserId, getCurrentUser } from '../lib/storage';
+import { saveAppointment, getAppointmentById, getServices, apiGetCurrentUser } from '../lib/storage';
 
 export default function AppointmentForm({ appointmentId: propAppointmentId }) {
   const navigate = useNavigate();
   const params = useParams();
   const appointmentId = propAppointmentId || params.id;
 
-  const [user, setUser] = useState(getCurrentUser());
+  const [user, setUser] = useState(null);
   const [existingAppointment, setExistingAppointment] = useState(null);
   const [services, setServices] = useState([]);
 
@@ -22,55 +22,56 @@ export default function AppointmentForm({ appointmentId: propAppointmentId }) {
   const [paymentStatus, setPaymentStatus] = useState('pending');
   const [notes, setNotes] = useState('');
 
-  // ---- LOAD USER + SERVICES + EXISTING APPOINTMENT ----
   useEffect(() => {
-    const loadData = async () => {
-      const currentUser = getCurrentUser();
-      if (!currentUser) {
-        navigate('/');
+    const load = async () => {
+      const currentUser = await apiGetCurrentUser();
+      const userObj = currentUser.user;
+      if (!userObj || !userObj.id) {
+        navigate("/");
         return;
       }
+      setUser(userObj);
 
-      setUser(currentUser);
-
-      // Load user services
-      const userServices = await getServicesByUserId(currentUser.id);
+      const userServices = await getServices(userObj.id);
       setServices(userServices || []);
 
-      // Load existing appointment if editing
       if (appointmentId) {
-        const appt = await getAppointmentById(appointmentId);
-        if (appt) {
+        try {
+          const appt = await getAppointmentById(appointmentId);
+
+          if (appt.user_id !== userObj.id) {
+            navigate("/appointments");
+            return;
+          }
           setExistingAppointment(appt);
-          setServiceId(appt.serviceId || '');
-          setCustomerName(appt.customerName || '');
-          setCustomerPhone(appt.customerPhone || '');
-          setCustomerEmail(appt.customerEmail || '');
-          setDate(appt.date || '');
-          setTime(appt.time || '');
-          setStatus(appt.status || 'scheduled');
-          setPaymentMethod(appt.paymentMethod || '');
-          setPaymentStatus(appt.paymentStatus || 'pending');
-          setNotes(appt.notes || '');
+          setServiceId(appt.serviceId || "");
+          setCustomerName(appt.customerName || "");
+          setCustomerPhone(appt.customerPhone || "");
+          setCustomerEmail(appt.customerEmail || "");
+          setDate(appt.date || "");
+          setTime(appt.time || "");
+          setStatus(appt.status || "scheduled");
+          setPaymentMethod(appt.paymentMethod || "");
+          setPaymentStatus(appt.paymentStatus || "pending");
+          setNotes(appt.notes || "");
+        } catch {
+          navigate("/appointments");
         }
       }
     };
-
-    loadData();
+    load();
   }, [appointmentId, navigate]);
 
-  // submit
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!user) {
-      navigate('/');
+    if (!user || !user.id) {
       return;
     }
 
     const appointment = {
-      id: existingAppointment?.id || Date.now().toString(),
-      userId: user.id,
+      id: existingAppointment?.id,
+      user_id: user.id,      // <- guaranteed to exist
       serviceId,
       customerName,
       customerPhone,
@@ -81,11 +82,16 @@ export default function AppointmentForm({ appointmentId: propAppointmentId }) {
       paymentMethod: paymentMethod || undefined,
       paymentStatus,
       notes,
-      createdAt: existingAppointment?.createdAt || new Date().toISOString(),
     };
 
-    await saveAppointment(appointment);
-    navigate('/appointments');
+    console.log("DEBUG appointment payload:", appointment);
+
+    try {
+      await saveAppointment(appointment);
+      navigate("/appointments");
+    } catch (err) {
+      console.error("Failed to save appointment:", err);
+    }
   };
 
   if (!user) return null;

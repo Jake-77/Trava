@@ -1,16 +1,19 @@
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getCurrentUser } from '../lib/storage';
+import { apiGetCurrentUser } from '../lib/storage';
 import ServiceForm from '../components/ServiceForm';
 
 export default function NewServicePage() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const user = getCurrentUser();
-    if (!user) {
-      navigate('/');
-    }
+    const newService = async () => {
+      const user = await apiGetCurrentUser();
+      if (!user || !user.user) {
+        navigate('/');
+      }
+    };
+    newService();
   }, [navigate]);
 
   return (

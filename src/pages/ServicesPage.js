@@ -1,20 +1,22 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { getCurrentUser, getServicesByUserId, deleteService } from '../lib/storage';
+import { apiGetCurrentUser, getServices, deleteService } from '../lib/storage';
 
 export default function ServicesPage() {
   const navigate = useNavigate();
   const [services, setServices] = useState([]);
 
   useEffect(() => {
-    const currentUser = getCurrentUser();
-    if (!currentUser) {
-      navigate('/');
-      return;
-    }
-    getServicesByUserId(currentUser.id).then((userServices) => {
+    const loadData = async () => {
+      const currentUser = await apiGetCurrentUser();
+      if (!currentUser) {
+        navigate('/');
+        return;
+      }
+      const userServices = await getServices(); 
       setServices(userServices);
-    });
+    };
+    loadData();
   }, [navigate]);
 
   const handleDelete = async (serviceId) => {

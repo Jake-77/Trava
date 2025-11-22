@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { getCurrentUser, getServiceById } from '../lib/storage';
+import { apiGetCurrentUser, getServiceById } from '../lib/storage';
 import ServiceForm from '../components/ServiceForm';
 
 export default function EditServicePage() {
@@ -10,8 +10,8 @@ export default function EditServicePage() {
 
   useEffect(() => {
     const checkAuth = async () => {
-      const user = getCurrentUser();
-      if (!user) {
+      const user = await apiGetCurrentUser();
+      if (!user  || !user.user) {
         navigate('/');
         return;
       }
@@ -21,7 +21,7 @@ export default function EditServicePage() {
         const service = await getServiceById(serviceId);
         
         // Check existence and ownership
-        if (!service || service.userId !== user.id) {
+        if (!service) {
           navigate('/services');
           return;
         }

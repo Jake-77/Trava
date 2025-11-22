@@ -1,32 +1,39 @@
 import { useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { getCurrentUser, getAppointmentById } from '../lib/storage';
+import { apiGetCurrentUser, getAppointmentById } from '../lib/storage';
 import AppointmentForm from '../components/AppointmentForm';
 
 export default function EditAppointmentPage() {
   const navigate = useNavigate();
   const { id: appointmentId } = useParams();
 
+
   useEffect(() => {
     const fetchAppointment = async () => {
-      const user = getCurrentUser(); // ⚠️ Depends on localStorage; if removed, use apiGetCurrentUser()
-      if (!user) {
+      // --- FIX: backend-based auth ---
+      const me = await apiGetCurrentUser();
+      if (!me || !me.user) {
         navigate('/');
         return;
       }
 
       try {
-        // Fetch appointment using backend first, localStorage fallback if API fails
-        const data = await getAppointmentById(appointmentId); // ⚠️ Previously synchronous; must now await
-        if (!data || data.userId !== user.id) {
+        // --- fetch from backend ---
+        const appointment = await getAppointmentById(appointmentId);
+
+        // If backend says "not found", it throws → handled below
+        if (!appointment) {
           navigate('/appointments');
           return;
         }
-        
+
+        // No need to check appointment.userId because:
+        // backend only returns user's own appointments
+
       } catch (err) {
-        console.error('Failed to fetch appointment:', err);
+        console.error("Failed to load appointment:", err);
         navigate('/appointments');
-      } 
+      }
     };
 
     fetchAppointment();

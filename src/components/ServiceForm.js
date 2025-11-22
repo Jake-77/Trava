@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { saveService, getServiceById } from '../lib/storage';
-import { getCurrentUser } from '../lib/storage';
+import { apiGetCurrentUser } from '../lib/storage';
 
 export default function ServiceForm({ serviceId: propServiceId }) {
   const navigate = useNavigate();
@@ -16,7 +16,7 @@ export default function ServiceForm({ serviceId: propServiceId }) {
   useEffect(() => {
     if (!serviceId) return;
     const loadService = async () => {
-      try{
+      try {
         const service = await getServiceById(serviceId);
         if (service) {
           setExistingService(service);
@@ -27,27 +27,27 @@ export default function ServiceForm({ serviceId: propServiceId }) {
       } catch (error) {
         console.error('Error loading service:', error);
       }
-    }; 
-    loadService()
+    };
+    loadService();
   }, [serviceId]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const user = getCurrentUser();
-    if (!user) {
-      navigate('/');
-      return;
-    }
-
     setLoading(true);
+
     try {
+      const user = await apiGetCurrentUser();
+      if (!user?.user?.id) {
+        navigate('/');
+        return;
+      }
+
       const service = {
-        id: existingService?.id || Date.now().toString(),
-        userId: user.id,
+        ...(existingService || {}),
+        user_id: user.user.id,
         title,
         description,
         price,
-        createdAt: existingService?.createdAt || new Date().toISOString(),
       };
 
       await saveService(service);

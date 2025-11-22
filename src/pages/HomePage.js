@@ -1,16 +1,20 @@
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getCurrentUser } from '../lib/storage';
+import { apiGetCurrentUser } from '../lib/storage';
 import AuthForm from '../components/AuthForm';
 
 export default function HomePage() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const user = getCurrentUser();
-    if (user) {
-      navigate('/dashboard');
-    }
+    const checkAuth = async () => {
+      const user = await apiGetCurrentUser();
+      if (user && user.user) {
+        navigate('/dashboard');
+      }
+    };
+
+    checkAuth();
   }, [navigate]);
 
   return (

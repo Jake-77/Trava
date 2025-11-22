@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
-import { getCurrentUser, getAppointmentById, deleteAppointment, getServiceById, saveAppointment } from '../lib/storage';
+import { apiGetCurrentUser, getAppointmentById, deleteAppointment, getServiceById, saveAppointment } from '../lib/storage';
 
 export default function AppointmentDetailPage() {
   const navigate = useNavigate();
@@ -10,22 +10,21 @@ export default function AppointmentDetailPage() {
 
   useEffect(() => {
     const loadData = async () => {
-      const currentUser = getCurrentUser(); // <-- Will change to await apiGetCurrentUser() when localStorage is removed
+      const currentUser = await apiGetCurrentUser(); 
       if (!currentUser) {
         navigate('/');
         return;
       }
-
       const foundAppointment = await getAppointmentById(appointmentId); 
-      // <-- Currently reads localStorage fallback. When localStorage is removed, this will be a pure API call
+     
       if (!foundAppointment || foundAppointment.userId !== currentUser.id) {
         navigate('/appointments');
         return;
       }
       setAppointment(foundAppointment);
+      
 
       const fetchedService = await getServiceById(foundAppointment.serviceId); 
-      // <-- Currently localStorage fallback. Will be pure API call without fallback
       setService(fetchedService);
     };
 
@@ -168,9 +167,9 @@ export default function AppointmentDetailPage() {
               Edit Appointment
             </button>
             <button
-              onClick={async () => { // <-- add async to await delete
+              onClick={async () => { 
                 if (window.confirm('Are you sure you want to delete this appointment?')) {
-                  await deleteAppointment(appointment.id); // <-- currently localStorage fallback, will be pure API
+                  await deleteAppointment(appointment.id); 
                   navigate('/appointments');
                 }
               }}

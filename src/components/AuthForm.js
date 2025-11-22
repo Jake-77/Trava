@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { saveUser, getUserByEmail, setCurrentUser, apiSignup, apiLogin } from '../lib/storage';
+import { apiSignup, apiLogin } from '../lib/storage';
 
-export default function AuthForm({ apiMode = false }) {
+export default function AuthForm() {
   const [isSignUp, setIsSignUp] = useState(true);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -16,40 +16,21 @@ export default function AuthForm({ apiMode = false }) {
     try {
       const trimmedEmail = email.trim().toLowerCase();
       const trimmedPassword = password.trim();
-      let user;
 
-      if (apiMode) {
-        // Use backend API
-        if (isSignUp) {
-          user = await apiSignup(trimmedEmail, trimmedPassword);
-        } else {
-          user = await apiLogin(trimmedEmail, trimmedPassword);
-        }
+      let response;
+
+      if (isSignUp) {
+        response = await apiSignup(trimmedEmail, trimmedPassword);
       } else {
-        // LocalStorage mode
-        if (isSignUp) {
-          const existingUser = await getUserByEmail(trimmedEmail);
-          if (existingUser) {
-            setError('Email already exists');
-            return;
-          }
-          const newUser = {
-            email: trimmedEmail,
-            password: trimmedPassword,
-          };
-          user = await saveUser(newUser); // make sure saveUser returns the saved user
-          setCurrentUser(user);
-        } else {
-          user = await getUserByEmail(trimmedEmail);
-          if (!user || user.password !== trimmedPassword) {
-            setError('Invalid email or password');
-            return;
-          }
-          setCurrentUser(user);
-        }
+        response = await apiLogin(trimmedEmail, trimmedPassword);
       }
 
-      navigate('/dashboard');
+      // All endpoints now return { user: { id, email } }
+      if (response.user && response.user.id) {
+        navigate('/dashboard');
+      } else {
+        setError('Unexpected response from server.');
+      }
 
     } catch (err) {
       console.error(err);

@@ -20,9 +20,7 @@ export default function PayAppointmentPage() {
           return;
         }
         setAppointment(foundAppointment);
-
-        // getServiceById currently uses localStorage fallback
-        // If localStorage is removed, this must rely purely on API
+        
         const foundService = await getServiceById(foundAppointment.serviceId);
         setService(foundService);
       } catch (error) {
