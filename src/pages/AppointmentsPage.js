@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { getCurrentUser, getAppointmentsByUserId, deleteAppointment, getServicesByUserId } from '../lib/storage';
+import { apiGetCurrentUser, getAppointments, deleteAppointment, getServices } from '../lib/storage';
 
 export default function AppointmentsPage() {
   const navigate = useNavigate();
@@ -10,34 +10,29 @@ export default function AppointmentsPage() {
 
   useEffect(() => {
     const loadData = async () => {
-      const currentUser = getCurrentUser(); 
-      // <-- Will change to await apiGetCurrentUser() when localStorage is removed
+      const currentUser = await apiGetCurrentUser(); 
 
       if (!currentUser) {
         navigate('/');
         return;
       }
-
-      const userAppointments = await getAppointmentsByUserId(currentUser.id); 
-      // <-- Currently reads localStorage fallback. Will be pure API call later
+      const userAppointments = await getAppointments(); 
       setAppointments(userAppointments);
 
-      const userServices = await getServicesByUserId(currentUser.id); 
-      // <-- Currently reads localStorage fallback. Will be pure API call later
+      const userServices = await getServices(); 
       setServices(userServices);
     };
 
     loadData();
   }, [navigate]);
 
-  const handleDelete = async (appointmentId) => { // <-- add async
+  const handleDelete = async (appointmentId) => { 
     if (window.confirm('Are you sure you want to delete this appointment?')) {
       await deleteAppointment(appointmentId); 
       // <-- currently localStorage fallback. Will be pure API call later
       setAppointments(appointments.filter(appointment => appointment.id !== appointmentId));
     }
   };
-
   const filteredAppointments = filter === 'all'
     ? appointments
     : appointments.filter(a => a.status === filter);

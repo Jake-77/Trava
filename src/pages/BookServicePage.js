@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { getServiceById, saveAppointment } from '../lib/storage';
+import { getServiceById, saveAppointment} from '../lib/storage';
 
 export default function BookServicePage() {
   const { serviceId } = useParams();
@@ -16,7 +16,6 @@ export default function BookServicePage() {
   useEffect(() => {
     const fetchService = async () => {
       const foundService = await getServiceById(serviceId); 
-      // <-- Currently reads localStorage if missing API, will become pure API call when localStorage removed
       if (!foundService) {
         console.error(`Service with ID ${serviceId} not found.`);
         return;
@@ -33,7 +32,6 @@ export default function BookServicePage() {
     setSubmitting(true);
 
     const appointment = {
-      id: Date.now().toString(),
       userId: service.userId,
       serviceId: service.id,
       customerName,
