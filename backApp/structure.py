@@ -63,13 +63,52 @@ def me():
     if not email:
         return jsonify({'user': None}), 200
 
-    user = query_db("SELECT id, email FROM users WHERE email = ?", [email], one=True)
+    user = query_db("SELECT id, email, paypal_handle FROM users WHERE email = ?", [email], one=True)
     return jsonify({'user': dict(user) if user else None}), 200
 
 @app.post('/api/auth/logout')
 def logout():
     session.clear()
     return jsonify({'message': 'logged out'}), 200
+
+@app.put('/api/auth/profile')
+def update_profile():
+    email = session.get('user_email')
+    if not email:
+        return jsonify({'error': 'Unauthorized'}), 401
+        
+    data = request.json
+    
+    # We will build a dynamic query based on what is provided
+    fields_to_update = []
+    args = []
+
+    # 1. Handle PayPal (allow empty string to clear it, but require key presence)
+    if 'paypal_handle' in data:
+        fields_to_update.append("paypal_handle=?")
+        args.append(data['paypal_handle'])
+
+    # 2. Handle Password (only update if it's not empty)
+    new_password = data.get('password')
+    if new_password and new_password.strip():
+        password_hash = generate_password_hash(new_password)
+        fields_to_update.append("password=?")
+        args.append(password_hash)
+
+    # If nothing to update, just return current user
+    if not fields_to_update:
+        user = query_db("SELECT id, email, paypal_handle FROM users WHERE email = ?", [email], one=True)
+        return jsonify({'user': dict(user)}), 200
+
+    # 3. Execute the Update
+    query = f"UPDATE users SET {', '.join(fields_to_update)} WHERE email=?"
+    args.append(email)
+    
+    query_db(query, args)
+    
+    # Return updated user info (excluding password hash)
+    user = query_db("SELECT id, email, paypal_handle FROM users WHERE email = ?", [email], one=True)
+    return jsonify({'user': dict(user)}), 200
 
 @app.get('/api/services')
 def get_services():
@@ -137,7 +176,13 @@ def get_appointment(appointment_id):
     appointment = query_db("SELECT * FROM appointments WHERE id = ?", [appointment_id], one=True)
     if not appointment:
         return jsonify({'error': 'Appointment not found'}), 404
-    return jsonify(dict(appointment)), 200
+    
+    user = query_db("SELECT paypal_handle FROM users WHERE id = ?", [appointment['user_id']], one=True)
+    # Convert to dict so we can add the handle
+    appt_dict = dict(appointment)
+    appt_dict['paypal_handle'] = user['paypal_handle'] if user else None
+    
+    return jsonify(appt_dict), 200
 
 @app.post('/api/appointments')
 def create_appointment():

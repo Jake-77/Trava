@@ -84,7 +84,7 @@ export default function AppointmentForm({ appointmentId: propAppointmentId }) {
       notes,
     };
 
-    console.log("DEBUG appointment payload:", appointment);
+    console.log("appointment payload:", appointment);
 
     try {
       await saveAppointment(appointment);

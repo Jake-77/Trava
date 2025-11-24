@@ -15,6 +15,7 @@ import NewAppointmentPage from './pages/NewAppointmentPage';
 import EditAppointmentPage from './pages/EditAppointmentPage';
 import BookServicePage from './pages/BookServicePage';
 import PayAppointmentPage from './pages/PayAppointmentPage';
+import SettingsPage from './pages/updateProfile'
 
 function App() {
   return (
@@ -32,6 +33,7 @@ function App() {
         <Route path="/appointments/:id/edit" element={<EditAppointmentPage />} />
         <Route path="/book/:serviceId" element={<BookServicePage />} />
         <Route path="/pay/:id" element={<PayAppointmentPage />} />
+        <Route path='/settings' element={<SettingsPage />} />
       </Routes>
     </Router>
   );
