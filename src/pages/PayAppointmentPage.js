@@ -11,8 +11,6 @@ export default function PayAppointmentPage() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // getAppointmentById currently uses localStorage fallback
-        // If localStorage is removed, this must be awaited and rely purely on API
         const foundAppointment = await getAppointmentById(appointmentId);
         
         if (!foundAppointment) {
@@ -42,8 +40,6 @@ export default function PayAppointmentPage() {
     };
 
     try {
-      // saveAppointment uses localStorage fallback
-      // If localStorage is removed, rely purely on API
       await saveAppointment(updated);
       setAppointment(updated);
       alert('Payment marked as cash. Thank you!');
@@ -53,21 +49,41 @@ export default function PayAppointmentPage() {
     }
   };
 
-  const handleStripePayment = () => {
+  const handlePayPalPayment = async () => {
     if (!appointment || !service) return;
-    // TODO: Wire up Stripe payment processing
-    // This would redirect to Stripe checkout or open Stripe payment modal
-    // After successful payment, mark as paid with stripe
-    alert('Stripe payment - to be implemented');
-    // Example flow:
-    // 1. Redirect to Stripe checkout
-    // 2. On success callback, mark as paid
-    // const updated = {
-    //   ...appointment,
-    //   paymentStatus: 'paid',
-    //   paymentMethod: 'stripe',
-    // };
-    // saveAppointment(updated);
+
+    // 1. Check if the provider has a PayPal handle
+    if (!appointment.paypal_handle) {
+      alert("This service provider has not set up PayPal details yet.");
+      return;
+    }
+    // 2. Generate the URL
+    // Format: paypal.me/HANDLE/PRICE
+    const url = `https://paypal.me/${appointment.paypal_handle}/${service.price}`;
+
+    // 3. Open PayPal in a new tab
+    window.open(url, '_blank');
+
+    // 4. Verify payment with the user (since PayPal doesn't auto-notify us in this simple version)
+    const confirmed = window.confirm(
+      "A new tab has opened for PayPal.\n\nAfter you complete the payment, click OK to mark this appointment as Paid."
+    );
+
+    if (confirmed) {
+      const updated = {
+        ...appointment,
+        paymentStatus: 'paid',
+        paymentMethod: 'paypal',
+      };
+
+      try {
+        await saveAppointment(updated);
+        setAppointment(updated);
+      } catch (error) {
+        console.error("Failed to save PayPal status:", error);
+        alert('Error saving payment status.');
+      }
+    }
   };
 
   if (loading) {
@@ -157,11 +173,11 @@ export default function PayAppointmentPage() {
                 Pay in Cash
               </button>
               <button
-                onClick={handleStripePayment}
+                onClick={handlePayPalPayment}
                 className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-3 px-4 rounded-lg transition-colors flex items-center justify-center gap-2"
               >
                 <span>💳</span>
-                Pay with Stripe
+                Pay with PayPal
               </button>
             </div>
             <p className="text-xs text-zinc-500 dark:text-zinc-400 text-center mt-4">

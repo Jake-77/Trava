@@ -138,6 +138,12 @@ export default function DashboardPage() {
             >
               📅 Appointments
             </button>
+            <button
+              onClick={() => navigate('/settings')}
+              className="w-full text-left bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 text-zinc-900 dark:text-zinc-100 font-medium py-3 px-4 rounded-lg transition-colors"
+            >
+              ⚙️ Settings
+            </button>
           </div>
         </div>
       </div>

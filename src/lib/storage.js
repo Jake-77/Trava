@@ -33,6 +33,18 @@ export async function apiGetCurrentUser() {
   return await res.json();
 }
 
+export async function apiUpdateProfile(profileData) {
+  const res = await fetch("/api/auth/profile", {
+    method: "PUT",
+    credentials: "include",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(profileData),
+  });
+
+  if (!res.ok) throw new Error("Failed to update profile");
+  return await res.json();
+}
+
 export async function apiLogout() {
   await fetch("/api/auth/logout", {
     method: "POST",
