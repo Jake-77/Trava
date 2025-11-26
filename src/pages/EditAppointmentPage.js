@@ -40,7 +40,7 @@ export default function EditAppointmentPage() {
   }, [appointmentId, navigate]);
 
   return (
-    <div className="min-h-screen bg-zinc-50 dark:bg-black py-8">
+    <div className="min-h-screen bg-[#D9E1F2] py-8">
       <AppointmentForm appointmentId={appointmentId} />
     </div>
   );

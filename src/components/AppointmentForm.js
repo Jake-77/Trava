@@ -99,15 +99,15 @@ export default function AppointmentForm({ appointmentId: propAppointmentId }) {
   const hasServices = services.length > 0;
 
   return (
-    <div className="w-full max-w-md mx-auto p-6">
-      <div className="bg-white dark:bg-zinc-900 rounded-lg shadow-lg p-8">
+    <div className="w-full max-w-md mx-auto p-6 text-black">
+      <div className="bg-white rounded-lg shadow-lg p-8 text-black">
         <h1 className="text-2xl font-bold mb-6">
           {existingAppointment ? 'Edit Appointment' : 'New Appointment'}
         </h1>
 
         {!hasServices && (
-          <div className="mb-4 p-3 bg-yellow-100 dark:bg-yellow-900 border border-yellow-400 dark:border-yellow-700 rounded-lg">
-            <p className="text-sm text-yellow-800 dark:text-yellow-200">
+          <div className="mb-4 p-3 bg-yellow-100 border border-yellow-400 rounded-lg">
+            <p className="text-sm text-yellow-800">
               You need to add at least one service first.{' '}
               <button
                 type="button"
@@ -131,7 +131,7 @@ export default function AppointmentForm({ appointmentId: propAppointmentId }) {
               value={serviceId}
               onChange={(e) => setServiceId(e.target.value)}
               required
-              className="w-full px-4 py-2 border border-zinc-300 dark:border-zinc-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-zinc-800"
+              className="w-full px-4 py-2 border border-zinc-300 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value="">Select a service</option>
               {services.map((service) => (
@@ -197,7 +197,7 @@ export default function AppointmentForm({ appointmentId: propAppointmentId }) {
                 value={date}
                 onChange={(e) => setDate(e.target.value)}
                 required
-                className="w-full px-4 py-2 border border-zinc-300 dark:border-zinc-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-zinc-800"
+                className="w-full px-4 py-2 border border-zinc-300 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
             <div>
@@ -210,7 +210,7 @@ export default function AppointmentForm({ appointmentId: propAppointmentId }) {
                 value={time}
                 onChange={(e) => setTime(e.target.value)}
                 required
-                className="w-full px-4 py-2 border border-zinc-300 dark:border-zinc-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-zinc-800"
+                className="w-full px-4 py-2 border border-zinc-300 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
           </div>
@@ -224,7 +224,7 @@ export default function AppointmentForm({ appointmentId: propAppointmentId }) {
               value={status}
               onChange={(e) => setStatus(e.target.value)}
               required
-              className="w-full px-4 py-2 border border-zinc-300 dark:border-zinc-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-zinc-800"
+              className="w-full px-4 py-2 border border-zinc-300 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-zinc-800"
             >
               <option value="scheduled">Scheduled</option>
               <option value="completed">Completed</option>
@@ -241,7 +241,7 @@ export default function AppointmentForm({ appointmentId: propAppointmentId }) {
               value={paymentStatus}
               onChange={(e) => setPaymentStatus(e.target.value)}
               required
-              className="w-full px-4 py-2 border border-zinc-300 dark:border-zinc-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-zinc-800"
+              className="w-full px-4 py-2 border border-zinc-300 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-zinc-800"
             >
               <option value="pending">Pending</option>
               <option value="paid">Paid</option>
@@ -257,7 +257,7 @@ export default function AppointmentForm({ appointmentId: propAppointmentId }) {
                 id="paymentMethod"
                 value={paymentMethod}
                 onChange={(e) => setPaymentMethod(e.target.value)}
-                className="w-full px-4 py-2 border border-zinc-300 dark:border-zinc-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-zinc-800"
+                className="w-full px-4 py-2 border border-zinc-300 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-zinc-800"
               >
                 <option value="">Select method</option>
                 <option value="cash">Cash</option>
@@ -275,7 +275,7 @@ export default function AppointmentForm({ appointmentId: propAppointmentId }) {
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               rows={3}
-              className="w-full px-4 py-2 border border-zinc-300 dark:border-zinc-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-zinc-800"
+              className="w-full px-4 py-2 border border-zinc-300 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-zinc-800"
               placeholder="Additional notes..."
             />
           </div>
@@ -283,14 +283,14 @@ export default function AppointmentForm({ appointmentId: propAppointmentId }) {
           <div className="flex gap-3">
             <button
               type="submit"
-              className="flex-1 bg-purple-600 hover:bg-purple-700 text-white font-medium py-2 px-4 rounded-lg transition-colors"
+              className="flex-1 bg-[#1E3A74] hover:bg-[#162B57] text-white font-medium py-2 px-4 rounded-lg transition-colors"
             >
               {existingAppointment ? 'Update' : 'Create'} Appointment
             </button>
             <button
               type="button"
               onClick={() => navigate('/appointments')}
-              className="flex-1 bg-zinc-200 dark:bg-zinc-700 hover:bg-zinc-300 dark:hover:bg-zinc-600 text-zinc-900 dark:text-zinc-100 font-medium py-2 px-4 rounded-lg transition-colors"
+              className="flex-1 bg-zinc-200 hover:bg-zinc-300 text-black font-medium py-2 px-4 rounded-lg transition-colors"
             >
               Cancel
             </button>
