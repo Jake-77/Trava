@@ -2,33 +2,39 @@ import { useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { apiGetCurrentUser, getAppointments, deleteAppointment, getServices } from '../lib/storage';
 
+
 export default function AppointmentsPage() {
   const navigate = useNavigate();
   const [appointments, setAppointments] = useState([]);
   const [services, setServices] = useState([]);
   const [filter, setFilter] = useState('all');
 
+
   useEffect(() => {
     const loadData = async () => {
-      const currentUser = await apiGetCurrentUser(); 
+      const currentUser = await apiGetCurrentUser();
+
 
       if (!currentUser) {
         navigate('/');
         return;
       }
-      const userAppointments = await getAppointments(); 
+      const userAppointments = await getAppointments();
       setAppointments(userAppointments);
 
-      const userServices = await getServices(); 
+
+      const userServices = await getServices();
       setServices(userServices);
     };
+
 
     loadData();
   }, [navigate]);
 
-  const handleDelete = async (appointmentId) => { 
+
+  const handleDelete = async (appointmentId) => {
     if (window.confirm('Are you sure you want to delete this appointment?')) {
-      await deleteAppointment(appointmentId); 
+      await deleteAppointment(appointmentId);
       // <-- currently localStorage fallback. Will be pure API call later
       setAppointments(appointments.filter(appointment => appointment.id !== appointmentId));
     }
@@ -37,11 +43,13 @@ export default function AppointmentsPage() {
     ? appointments
     : appointments.filter(a => a.status === filter);
 
+
   const sortedAppointments = [...filteredAppointments].sort((a, b) => {
     const dateA = new Date(`${a.date}T${a.time}`).getTime();
     const dateB = new Date(`${b.date}T${b.time}`).getTime();
     return dateA - dateB;
   });
+
 
   return (
     <div className="min-h-screen bg-[#D9E1F2] p-4">
@@ -63,6 +71,7 @@ export default function AppointmentsPage() {
           </button>
         </div>
 
+
         {/* Filter */}
         <div className="flex gap-2 mb-6">
           {['all', 'scheduled', 'completed', 'cancelled'].map((status) => (
@@ -79,6 +88,7 @@ export default function AppointmentsPage() {
             </button>
           ))}
         </div>
+
 
         {sortedAppointments.length === 0 ? (
           <div className="bg-white rounded-lg shadow-md p-8 text-center">
@@ -151,3 +161,6 @@ export default function AppointmentsPage() {
     </div>
   );
 }
+
+
+
