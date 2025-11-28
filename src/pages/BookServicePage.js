@@ -12,10 +12,11 @@ export default function BookServicePage() {
   const [time, setTime] = useState('');
   const [notes, setNotes] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [bookingConfirmed, setBookingConfirmed] = useState(false);
 
   useEffect(() => {
     const fetchService = async () => {
-      const foundService = await getServiceById(serviceId); 
+      const foundService = await getServiceById(serviceId);
       if (!foundService) {
         console.error(`Service with ID ${serviceId} not found.`);
         return;
@@ -45,19 +46,11 @@ export default function BookServicePage() {
       createdAt: new Date().toISOString(),
     };
 
-    await saveAppointment(appointment); 
+    await saveAppointment(appointment);
     // <-- Currently writes to localStorage, will become API POST call when localStorage removed
 
-    alert('Appointment booked successfully! You will receive a confirmation.');
-
-    // Reset form
-    setCustomerName('');
-    setCustomerPhone('');
-    setCustomerEmail('');
-    setDate('');
-    setTime('');
-    setNotes('');
     setSubmitting(false);
+    setBookingConfirmed(true);
   };
 
   if (!service) {
@@ -69,6 +62,46 @@ export default function BookServicePage() {
   }
 
   const today = new Date().toISOString().split('T')[0];
+
+  // Show confirmation screen after booking
+  if (bookingConfirmed) {
+    return (
+      <div className="min-h-screen bg-zinc-50 dark:bg-black flex items-center justify-center p-4">
+        <div className="max-w-md mx-auto">
+          <div className="bg-white dark:bg-zinc-900 rounded-lg shadow-lg p-8 text-center">
+            <div className="mb-6">
+              <div className="w-20 h-20 mx-auto mb-4 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center">
+                <svg
+                  className="w-12 h-12 text-green-600 dark:text-green-400"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M5 13l4 4L19 7"
+                  />
+                </svg>
+              </div>
+              <h1 className="text-2xl font-bold text-zinc-900 dark:text-zinc-100 mb-2">
+                Booking Confirmed
+              </h1>
+              <p className="text-zinc-600 dark:text-zinc-400">
+                Your appointment has been successfully booked!
+              </p>
+            </div>
+            <div className="bg-zinc-50 dark:bg-zinc-800 rounded-lg p-4 mb-4">
+              <p className="text-sm text-zinc-600 dark:text-zinc-400">
+                It's safe to close this page.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-zinc-50 dark:bg-black p-4">

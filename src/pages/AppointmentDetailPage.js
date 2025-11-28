@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
+import { QRCodeSVG } from 'qrcode.react';
 import { apiGetCurrentUser, getAppointmentById, deleteAppointment, getServiceById, saveAppointment } from '../lib/storage';
 
 export default function AppointmentDetailPage() {
@@ -10,21 +11,21 @@ export default function AppointmentDetailPage() {
 
   useEffect(() => {
     const loadData = async () => {
-      const currentUser = await apiGetCurrentUser(); 
+      const currentUser = await apiGetCurrentUser();
       if (!currentUser) {
         navigate('/');
         return;
       }
-      const foundAppointment = await getAppointmentById(appointmentId); 
-     
+      const foundAppointment = await getAppointmentById(appointmentId);
+
       if (!foundAppointment || foundAppointment.userId !== currentUser.id) {
         navigate('/appointments');
         return;
       }
       setAppointment(foundAppointment);
-      
 
-      const fetchedService = await getServiceById(foundAppointment.serviceId); 
+
+      const fetchedService = await getServiceById(foundAppointment.serviceId);
       setService(fetchedService);
     };
 
@@ -103,7 +104,7 @@ export default function AppointmentDetailPage() {
                     <p className="text-xs text-blue-800 dark:text-blue-200 mb-2 font-medium">
                       Payment Link
                     </p>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 mb-3">
                       <input
                         type="text"
                         readOnly
@@ -122,6 +123,18 @@ export default function AppointmentDetailPage() {
                         Copy
                       </button>
                     </div>
+                    {typeof window !== 'undefined' && (
+                      <div className="flex justify-center">
+                        <div className="bg-white dark:bg-zinc-800 p-3 rounded-lg">
+                          <QRCodeSVG
+                            value={`${window.location.origin}/pay/${appointment.id}`}
+                            size={150}
+                            level="H"
+                            includeMargin={true}
+                          />
+                        </div>
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
@@ -167,9 +180,9 @@ export default function AppointmentDetailPage() {
               Edit Appointment
             </button>
             <button
-              onClick={async () => { 
+              onClick={async () => {
                 if (window.confirm('Are you sure you want to delete this appointment?')) {
-                  await deleteAppointment(appointment.id); 
+                  await deleteAppointment(appointment.id);
                   navigate('/appointments');
                 }
               }}
