@@ -1,3 +1,27 @@
+/**
+ * AppointmentDetailPage - Appointment Detail View
+ *
+ * Purpose:
+ * Displays comprehensive details for a specific appointment with full
+ * customer information and payment management options.
+ *
+ * Features:
+ * - Customer contact information (name, phone, email)
+ * - Appointment date, time, and status
+ * - Payment status and method display
+ * - Service details and pricing
+ * - Optional notes section
+ *
+ * Payment Management:
+ * - Copyable payment link for customers
+ * - QR code generation for easy payment access
+ * - Mark payment as cash or Stripe
+ * - Only shows payment options for pending payments
+ *
+ * Actions:
+ * - Edit appointment (navigates to edit page)
+ * - Delete appointment (with confirmation)
+ */
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
 import { QRCodeSVG } from 'qrcode.react';

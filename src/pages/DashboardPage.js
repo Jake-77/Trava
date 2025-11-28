@@ -1,10 +1,36 @@
+/**
+ * DashboardPage - Main Dashboard
+ *
+ * Purpose:
+ * Central hub showing key metrics and quick access to main features.
+ * First page users see after logging in.
+ *
+ * Statistics Display:
+ * - Total services count
+ * - Number of pending payments
+ * - Total revenue (calculated from paid appointments)
+ *
+ * Quick Actions:
+ * - Add new service
+ * - Create new appointment
+ * - View all appointments
+ *
+ * Navigation:
+ * - Links to Services, Appointments, and Settings pages
+ * - Logout button
+ *
+ * Data Loading:
+ * - Fetches user data, services, and appointments on mount
+ * - Shows loading state while fetching
+ * - Redirects to home if not authenticated
+ */
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { apiGetCurrentUser, apiLogout, getServices, getAppointments } from '../lib/storage';
 
 export default function DashboardPage() {
   const navigate = useNavigate();
-  const [user, setUser] = useState(null); 
+  const [user, setUser] = useState(null);
   const [services, setServices] = useState([]);
   const [appointments, setAppointments] = useState([]);
   const [loading, setLoading] = useState(true);

@@ -1,3 +1,20 @@
+/**
+ * EditServicePage - Edit Service Wrapper
+ *
+ * Purpose:
+ * Page wrapper that handles authentication and authorization before
+ * rendering the service form in edit mode.
+ *
+ * Flow:
+ * 1. Verifies user is authenticated
+ * 2. Fetches service to confirm it exists and belongs to user
+ * 3. Shows loading state during verification
+ * 4. Renders ServiceForm with serviceId prop
+ *
+ * Security:
+ * - Redirects to home if not authenticated
+ * - Redirects to services list if service not found or unauthorized
+ */
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { apiGetCurrentUser, getServiceById } from '../lib/storage';
@@ -19,13 +36,13 @@ export default function EditServicePage() {
       try {
         // Await the async service fetch
         const service = await getServiceById(serviceId);
-        
+
         // Check existence and ownership
         if (!service) {
           navigate('/services');
           return;
         }
-        
+
         // If valid, stop loading and show form
         setLoading(false);
       } catch (error) {

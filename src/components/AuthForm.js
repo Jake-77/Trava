@@ -1,3 +1,21 @@
+/**
+ * AuthForm - Authentication Form
+ *
+ * Purpose:
+ * Handles user authentication with toggle between login and signup modes.
+ *
+ * Features:
+ * - Email and password input fields
+ * - Toggle button to switch between login and signup
+ * - Input validation (trims whitespace, normalizes email)
+ * - Error message display for failed authentication
+ * - Automatic redirect to dashboard on successful auth
+ *
+ * User Flow:
+ * - Users can sign up for a new account or login to existing account
+ * - Form validates input and shows appropriate error messages
+ * - On success, navigates to dashboard
+ */
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { apiSignup, apiLogin } from '../lib/storage';

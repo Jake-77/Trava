@@ -1,3 +1,28 @@
+/**
+ * ServiceDetailPage - Service Detail View
+ *
+ * Purpose:
+ * Displays comprehensive details for a specific service with sharing
+ * and management capabilities.
+ *
+ * Features:
+ * - Service title, description, and price
+ * - Creation date display
+ * - Shareable booking link generation
+ *
+ * Sharing:
+ * - Copy booking link to clipboard
+ * - Share via Web Share API (if supported by browser)
+ * - Fallback to clipboard copy if share API unavailable
+ *
+ * Actions:
+ * - Edit service (navigates to edit page)
+ * - Delete service (with confirmation dialog)
+ *
+ * Security:
+ * - Verifies service ownership before displaying
+ * - Redirects to services list if unauthorized
+ */
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
 import { apiGetCurrentUser, getServiceById, deleteService } from '../lib/storage';

@@ -1,3 +1,30 @@
+/**
+ * PayAppointmentPage - Public Payment Page
+ *
+ * Purpose:
+ * Public-facing page where customers can pay for their appointment.
+ * No authentication required - accessible via payment link.
+ *
+ * Features:
+ * - Displays service details and appointment information
+ * - Shows appointment date, time, and price
+ *
+ * Payment Options:
+ * - Cash: Marks payment as paid immediately
+ * - PayPal: Opens PayPal.me link in new tab, then confirms payment
+ *
+ * States:
+ * - Payment form: shown for unpaid appointments
+ * - Confirmation screen: shown after successful payment
+ * - Error state: shown if appointment or service not found
+ *
+ * User Flow:
+ * 1. Customer receives payment link
+ * 2. Views appointment and service details
+ * 3. Selects payment method (cash or PayPal)
+ * 4. Payment status updated
+ * 5. Confirmation screen displayed
+ */
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { getAppointmentById, getServiceById, saveAppointment } from '../lib/storage';
@@ -12,13 +39,13 @@ export default function PayAppointmentPage() {
     const fetchData = async () => {
       try {
         const foundAppointment = await getAppointmentById(appointmentId);
-        
+
         if (!foundAppointment) {
           setLoading(false);
           return;
         }
         setAppointment(foundAppointment);
-        
+
         const foundService = await getServiceById(foundAppointment.serviceId);
         setService(foundService);
       } catch (error) {
@@ -32,7 +59,7 @@ export default function PayAppointmentPage() {
 
   const handleCashPayment = async () => {
     if (!appointment) return;
-    
+
     const updated = {
       ...appointment,
       paymentStatus: 'paid',
