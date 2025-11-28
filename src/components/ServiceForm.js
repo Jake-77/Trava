@@ -1,3 +1,22 @@
+/**
+ * ServiceForm - Create/Edit Service Form
+ *
+ * Purpose:
+ * Form component for creating new services or editing existing ones.
+ * Works in both create and edit modes based on whether a serviceId is provided.
+ *
+ * Features:
+ * - Service title/type input
+ * - Description textarea
+ * - Price input (flexible format: $75/service, $50/hour, etc.)
+ * - Pre-fills data when editing existing service
+ * - Loading state during save operation
+ *
+ * Data Flow:
+ * - Validates user authentication before saving
+ * - Associates service with logged-in user
+ * - Redirects to services list after successful save
+ */
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { saveService, getServiceById } from '../lib/storage';

@@ -1,3 +1,27 @@
+/**
+ * ServicesPage - Services List View
+ *
+ * Purpose:
+ * Displays a list of all services created by the logged-in user.
+ *
+ * Features:
+ * - Service cards showing title, description (truncated), and price
+ * - Quick actions: view details or delete
+ * - Empty state with call-to-action when no services exist
+ *
+ * Navigation:
+ * - Back to dashboard link
+ * - Add new service button
+ *
+ * Actions:
+ * - View service details (navigates to detail page)
+ * - Delete service (with confirmation dialog)
+ *
+ * Data:
+ * - Fetches user's services on mount
+ * - Updates list after deletion
+ * - Redirects to home if not authenticated
+ */
 import { useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { apiGetCurrentUser, getServices, deleteService } from '../lib/storage';
@@ -13,7 +37,7 @@ export default function ServicesPage() {
         navigate('/');
         return;
       }
-      const userServices = await getServices(); 
+      const userServices = await getServices();
       setServices(userServices);
     };
     loadData();
