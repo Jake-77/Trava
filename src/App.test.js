@@ -1,9 +1,21 @@
 import { render, screen } from '@testing-library/react';
 import App from './App';
 
-// Mock the storage module to prevent localStorage issues in tests
+// Mock the storage module to prevent API calls in tests
 jest.mock('./lib/storage', () => ({
-  getCurrentUser: jest.fn(() => null),
+  apiGetCurrentUser: jest.fn(() => Promise.resolve({ user: null })),
+  apiSignup: jest.fn(),
+  apiLogin: jest.fn(),
+  apiLogout: jest.fn(),
+  apiUpdateProfile: jest.fn(),
+  getServices: jest.fn(() => Promise.resolve([])),
+  getServiceById: jest.fn(),
+  saveService: jest.fn(),
+  deleteService: jest.fn(),
+  getAppointments: jest.fn(() => Promise.resolve([])),
+  getAppointmentById: jest.fn(),
+  saveAppointment: jest.fn(),
+  deleteAppointment: jest.fn(),
 }));
 
 test('renders home page with sign up form by default', () => {

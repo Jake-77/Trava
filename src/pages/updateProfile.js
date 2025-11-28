@@ -1,13 +1,15 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { apiGetCurrentUser, apiUpdateProfile } from '../lib/storage';
 
 export default function Settings() {
+  const navigate = useNavigate();
   const [paypalHandle, setPaypalHandle] = useState('');
-  
+
   // Password states
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  
+
   const [status, setStatus] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -25,7 +27,7 @@ export default function Settings() {
     setStatus('');
 
     // --- VALIDATION START ---
-    
+
     // 1. Check if passwords match (only if the user typed a new password)
     if (newPassword && newPassword !== confirmPassword) {
       setStatus('Error: Passwords do not match.');
@@ -34,7 +36,7 @@ export default function Settings() {
 
     setLoading(true);
     const payload = {};
-    
+
     // Always send the handle
     payload.paypal_handle = paypalHandle;
 
@@ -46,16 +48,17 @@ export default function Settings() {
     try {
       await apiUpdateProfile(payload);
       setStatus('Settings saved successfully!');
-      
+
       // Clear password fields on success
       setNewPassword('');
       setConfirmPassword('');
-      
-      // Clear success message after 3 seconds
-      setTimeout(() => setStatus(''), 3000);
+
+      // Redirect to dashboard after a brief delay to show success message
+      setTimeout(() => {
+        navigate('/dashboard');
+      }, 1000);
     } catch (err) {
       setStatus('Error saving settings.');
-    } finally {
       setLoading(false);
     }
   };
@@ -64,9 +67,9 @@ export default function Settings() {
     <div className="w-full max-w-md mx-auto p-6">
       <div className="bg-white dark:bg-zinc-900 rounded-lg shadow-lg p-8">
         <h1 className="text-2xl font-bold mb-6">Settings</h1>
-        
+
         <form onSubmit={handleSave} className="space-y-6">
-          
+
           {/* PayPal Section */}
           <div>
             <label className="block text-sm font-medium mb-2">
@@ -108,7 +111,7 @@ export default function Settings() {
 
             {/* Only show Confirm Password if user has started typing a new password */}
             {newPassword && (
-              <div className="animate-fade-in"> 
+              <div className="animate-fade-in">
                 <label className="block text-sm font-medium mb-2">
                   Confirm New Password
                 </label>
@@ -132,13 +135,13 @@ export default function Settings() {
               Leave blank if you don't want to change it.
             </p>
           </div>
-          
+
           <button
             type="submit"
             disabled={loading}
             className={`w-full font-medium py-2 px-4 rounded-lg transition-colors ${
-              loading 
-                ? 'bg-purple-400 cursor-not-allowed' 
+              loading
+                ? 'bg-purple-400 cursor-not-allowed'
                 : 'bg-purple-600 hover:bg-purple-700 text-white'
             }`}
           >
