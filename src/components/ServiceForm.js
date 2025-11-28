@@ -62,13 +62,13 @@ export default function ServiceForm({ serviceId: propServiceId }) {
 
   return (
     <div className="w-full max-w-md mx-auto p-6">
-      <div className="bg-white dark:bg-zinc-900 rounded-lg shadow-lg p-8">
-        <h1 className="text-2xl font-bold mb-6">
+      <div className="bg-white rounded-lg shadow-lg p-8">
+        <h1 className="text-2xl font-bold mb-6 text-zinc-900">
           {existingService ? 'Edit Service' : 'Add New Service'}
         </h1>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label htmlFor="title" className="block text-sm font-medium mb-2">
+            <label htmlFor="title" className="block text-sm font-medium mb-2 text-zinc-900">
               Service Type
             </label>
             <input
@@ -77,12 +77,12 @@ export default function ServiceForm({ serviceId: propServiceId }) {
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               required
-              className="w-full px-4 py-2 border border-zinc-300 dark:border-zinc-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-zinc-800"
+              className="w-full px-4 py-2 border border-zinc-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-black"
               placeholder="e.g., Car Detailing, Chimney Sweep"
             />
           </div>
           <div>
-            <label htmlFor="description" className="block text-sm font-medium mb-2">
+            <label htmlFor="description" className="block text-sm font-medium mb-2 text-zinc-900">
               Service Description
             </label>
             <textarea
@@ -91,12 +91,12 @@ export default function ServiceForm({ serviceId: propServiceId }) {
               onChange={(e) => setDescription(e.target.value)}
               required
               rows={4}
-              className="w-full px-4 py-2 border border-zinc-300 dark:border-zinc-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-zinc-800"
+              className="w-full px-4 py-2 border border-zinc-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-black"
               placeholder="Describe the service you provide..."
             />
           </div>
           <div>
-            <label htmlFor="price" className="block text-sm font-medium mb-2">
+            <label htmlFor="price" className="block text-sm font-medium mb-2 text-zinc-900">
               Price
             </label>
             <input
@@ -105,7 +105,7 @@ export default function ServiceForm({ serviceId: propServiceId }) {
               value={price}
               onChange={(e) => setPrice(e.target.value)}
               required
-              className="w-full px-4 py-2 border border-zinc-300 dark:border-zinc-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-zinc-800"
+              className="w-full px-4 py-2 border border-zinc-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-black"
               placeholder="e.g., $75/service, $50/hour, $150"
             />
           </div>
@@ -113,14 +113,14 @@ export default function ServiceForm({ serviceId: propServiceId }) {
             <button
               type="submit"
               disabled={loading}
-              className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex-1 bg-[#1E3A74] hover:bg-[#162B57] text-white font-medium py-2 px-4 rounded-lg transition-colors"
             >
               {loading ? 'Saving...' : existingService ? 'Update' : 'Add'} Service
             </button>
             <button
               type="button"
               onClick={() => navigate('/services')}
-              className="flex-1 bg-zinc-200 dark:bg-zinc-700 hover:bg-zinc-300 dark:hover:bg-zinc-600 text-zinc-900 dark:text-zinc-100 font-medium py-2 px-4 rounded-lg transition-colors"
+              className="flex-1 bg-zinc-200 hover:bg-zinc-300 text-zinc-900 font-medium py-2 px-4 rounded-lg transition-colors"
             >
               Cancel
             </button>

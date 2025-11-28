@@ -18,7 +18,7 @@ export default function HomePage() {
   }, [navigate]);
 
   return (
-    <div className="min-h-screen bg-zinc-50 dark:bg-black flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-b from-white to-[#85ABD2] flex items-center justify-center p-4">
       <AuthForm />
     </div>
   );

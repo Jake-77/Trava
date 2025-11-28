@@ -1,4 +1,3 @@
-# update_db.py
 import sqlite3
 
 DB_PATH = 'database.db'

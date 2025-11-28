@@ -43,8 +43,8 @@ export default function AppointmentDetailPage() {
     setAppointment(updated);
   };
 
-  const handleStripePayment = async () => {
-    await handlePayment('stripe');
+  const handlePaypalPayment = async () => { 
+    await handlePayment('paypal');
   };
 
   if (!appointment) {
@@ -56,52 +56,52 @@ export default function AppointmentDetailPage() {
   }
 
   return (
-    <div className="min-h-screen bg-zinc-50 dark:bg-black p-4">
+    <div className="min-h-screen bg-[#D9E1F2] p-4">
       <div className="max-w-2xl mx-auto">
         <Link to="/appointments" className="mb-4 text-blue-600 hover:text-blue-700 text-sm font-medium inline-block">
           ← Back to Appointments
         </Link>
-        <div className="bg-white dark:bg-zinc-900 rounded-lg shadow-lg p-6">
+        <div className="bg-white rounded-lg shadow-lg p-6">
           <div className="mb-6">
-            <h1 className="text-3xl font-bold text-zinc-900 dark:text-zinc-100 mb-2">
+            <h1 className="text-3xl font-bold text-zinc-900 mb-2">
               {service?.title}
             </h1>
-            <p className="text-sm text-zinc-500 dark:text-zinc-400">
+            <p className="text-sm text-zinc-500">
               {new Date(appointment.date).toLocaleDateString()} at {appointment.time}
             </p>
           </div>
 
           <div className="space-y-4 mb-6">
             <div>
-              <h2 className="text-sm font-semibold text-zinc-600 dark:text-zinc-400 mb-1">Customer</h2>
-              <p className="text-zinc-900 dark:text-zinc-100 font-medium">{appointment.customerName}</p>
+              <h2 className="text-sm font-semibold text-zinc-600 mb-1">Customer</h2>
+              <p className="text-zinc-900 font-medium">{appointment.customerName}</p>
               {appointment.customerPhone && (
-                <p className="text-sm text-zinc-600 dark:text-zinc-400">📞 {appointment.customerPhone}</p>
+                <p className="text-sm text-zinc-600">📞 {appointment.customerPhone}</p>
               )}
               {appointment.customerEmail && (
-                <p className="text-sm text-zinc-600 dark:text-zinc-400">✉️ {appointment.customerEmail}</p>
+                <p className="text-sm text-zinc-600">✉️ {appointment.customerEmail}</p>
               )}
             </div>
             <div>
-              <h2 className="text-sm font-semibold text-zinc-600 dark:text-zinc-400 mb-1">Status</h2>
-              <p className="text-zinc-900 dark:text-zinc-100 capitalize">{appointment.status}</p>
+              <h2 className="text-sm font-semibold text-zinc-600 mb-1">Status</h2>
+              <p className="text-zinc-900 capitalize">{appointment.status}</p>
             </div>
             <div>
-              <h2 className="text-sm font-semibold text-zinc-600 dark:text-zinc-400 mb-1">Payment Status</h2>
+              <h2 className="text-sm font-semibold text-zinc-600 mb-1">Payment Status</h2>
               <p className={`font-medium ${appointment.paymentStatus === 'paid' ? 'text-green-600 dark:text-green-400' : 'text-orange-600 dark:text-orange-400'}`}>
                 {appointment.paymentStatus === 'paid' ? '✓ Paid' : 'Pending Payment'}
               </p>
               {appointment.paymentMethod && (
-                <p className="text-sm text-zinc-600 dark:text-zinc-400">Method: {appointment.paymentMethod}</p>
+                <p className="text-sm text-zinc-600">Method: {appointment.paymentMethod}</p>
               )}
             </div>
             {service && (
               <div>
-                <h2 className="text-sm font-semibold text-zinc-600 dark:text-zinc-400 mb-1">Price</h2>
-                <p className="text-2xl font-bold text-green-600 dark:text-green-400 mb-3">{service.price}</p>
+                <h2 className="text-sm font-semibold text-zinc-600 mb-1">Price</h2>
+                <p className="text-2xl font-bold text-[#1E3A74] mb-3">{service.price}</p>
                 {appointment.paymentStatus === 'pending' && (
-                  <div className="mt-3 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-                    <p className="text-xs text-blue-800 dark:text-blue-200 mb-2 font-medium">
+                  <div className="mt-3 p-3 bg-[#cbd9f0] rounded-lg">
+                    <p className="text-xs text-blue-800 mb-2 font-medium">
                       Payment Link
                     </p>
                     <div className="flex items-center gap-2 mb-3">
@@ -109,7 +109,7 @@ export default function AppointmentDetailPage() {
                         type="text"
                         readOnly
                         value={typeof window !== 'undefined' ? `${window.location.origin}/pay/${appointment.id}` : ''}
-                        className="flex-1 text-xs px-2 py-1 bg-white dark:bg-zinc-800 border border-zinc-300 dark:border-zinc-700 rounded text-zinc-900 dark:text-zinc-100"
+                        className="flex-1 text-xs px-2 py-1 bg-white border border-zinc-300 rounded text-zinc-900"
                       />
                       <button
                         onClick={() => {
@@ -118,7 +118,7 @@ export default function AppointmentDetailPage() {
                             alert('Payment link copied to clipboard!');
                           }
                         }}
-                        className="text-xs bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded transition-colors"
+                        className="text-xs bg-[#1E3A74] hover:bg-[#162B57] text-white px-3 py-1 rounded transition-colors"
                       >
                         Copy
                       </button>
@@ -149,33 +149,33 @@ export default function AppointmentDetailPage() {
 
           {/* Payment Options */}
           {appointment.paymentStatus === 'pending' && (
-            <div className="border-t border-zinc-200 dark:border-zinc-800 pt-6 mb-6">
-              <h3 className="text-md font-semibold text-zinc-900 dark:text-zinc-100 mb-3">
+            <div className="border-t border-zinc-200 pt-6 mb-6">
+              <h3 className="text-md font-semibold text-zinc-900 mb-3">
                 Payment Options
               </h3>
               <div className="space-y-3">
                 <button
                   onClick={() => handlePayment('cash')}
-                  className="w-full bg-green-600 hover:bg-green-700 text-white font-medium py-3 px-4 rounded-lg transition-colors flex items-center justify-center gap-2"
+                  className="w-full bg-[#4F7CEB] hover:bg-[#3E67CB] text-white font-medium py-3 px-4 rounded-lg transition-colors flex items-center justify-center gap-2"
                 >
                   <span>💵</span>
                   Mark as Paid - Cash
                 </button>
                 <button
-                  onClick={handleStripePayment}
-                  className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-3 px-4 rounded-lg transition-colors flex items-center justify-center gap-2"
+                  onClick={handlePaypalPayment}
+                  className="w-full bg-[#1E3A74] hover:bg-[#162B57] text-white font-medium py-3 px-4 rounded-lg transition-colors flex items-center justify-center gap-2"
                 >
                   <span>💳</span>
-                  Customer Paid with Stripe
+                  Customer Paid with Paypal
                 </button>
               </div>
             </div>
           )}
 
-          <div className="flex gap-3 pt-4 border-t border-zinc-200 dark:border-zinc-800">
+          <div className="flex gap-3 pt-4 border-t border-zinc-200">
             <button
               onClick={() => navigate(`/appointments/${appointment.id}/edit`)}
-              className="flex-1 bg-purple-600 hover:bg-purple-700 text-white font-medium py-2 px-4 rounded-lg transition-colors"
+              className="flex-1 bg-[#1E3A74] hover:bg-[#162B57] text-white font-medium py-2 px-4 rounded-lg transition-colors"
             >
               Edit Appointment
             </button>

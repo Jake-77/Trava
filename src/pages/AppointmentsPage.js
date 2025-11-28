@@ -2,33 +2,39 @@ import { useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { apiGetCurrentUser, getAppointments, deleteAppointment, getServices } from '../lib/storage';
 
+
 export default function AppointmentsPage() {
   const navigate = useNavigate();
   const [appointments, setAppointments] = useState([]);
   const [services, setServices] = useState([]);
   const [filter, setFilter] = useState('all');
 
+
   useEffect(() => {
     const loadData = async () => {
-      const currentUser = await apiGetCurrentUser(); 
+      const currentUser = await apiGetCurrentUser();
+
 
       if (!currentUser) {
         navigate('/');
         return;
       }
-      const userAppointments = await getAppointments(); 
+      const userAppointments = await getAppointments();
       setAppointments(userAppointments);
 
-      const userServices = await getServices(); 
+
+      const userServices = await getServices();
       setServices(userServices);
     };
+
 
     loadData();
   }, [navigate]);
 
-  const handleDelete = async (appointmentId) => { 
+
+  const handleDelete = async (appointmentId) => {
     if (window.confirm('Are you sure you want to delete this appointment?')) {
-      await deleteAppointment(appointmentId); 
+      await deleteAppointment(appointmentId);
       // <-- currently localStorage fallback. Will be pure API call later
       setAppointments(appointments.filter(appointment => appointment.id !== appointmentId));
     }
@@ -37,14 +43,16 @@ export default function AppointmentsPage() {
     ? appointments
     : appointments.filter(a => a.status === filter);
 
+
   const sortedAppointments = [...filteredAppointments].sort((a, b) => {
     const dateA = new Date(`${a.date}T${a.time}`).getTime();
     const dateB = new Date(`${b.date}T${b.time}`).getTime();
     return dateA - dateB;
   });
 
+
   return (
-    <div className="min-h-screen bg-zinc-50 dark:bg-black p-4">
+    <div className="min-h-screen bg-[#D9E1F2] p-4">
       <div className="max-w-2xl mx-auto">
         <div className="flex justify-between items-center mb-6">
           <div className="flex items-center gap-3">
@@ -57,11 +65,12 @@ export default function AppointmentsPage() {
           </div>
           <button
             onClick={() => navigate('/appointments/new')}
-            className="bg-purple-600 hover:bg-purple-700 text-white font-medium py-2 px-4 rounded-lg transition-colors text-sm"
+            className="bg-[#4F7CEB] hover:bg-[#3E67CB] text-white font-medium py-2 px-4 rounded-lg transition-colors text-sm"
           >
             + New Appointment
           </button>
         </div>
+
 
         {/* Filter */}
         <div className="flex gap-2 mb-6">
@@ -71,8 +80,8 @@ export default function AppointmentsPage() {
               onClick={() => setFilter(status)}
               className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                 filter === status
-                  ? 'bg-purple-600 text-white'
-                  : 'bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800'
+                  ? 'bg-[#4F7CEB] text-white'
+                  : 'bg-white text-zinc-700 hover:bg-[#3E67CB]'
               }`}
             >
               {status.charAt(0).toUpperCase() + status.slice(1)}
@@ -80,14 +89,15 @@ export default function AppointmentsPage() {
           ))}
         </div>
 
+
         {sortedAppointments.length === 0 ? (
-          <div className="bg-white dark:bg-zinc-900 rounded-lg shadow-md p-8 text-center">
-            <p className="text-zinc-600 dark:text-zinc-400 mb-4">
+          <div className="bg-white rounded-lg shadow-md p-8 text-center">
+            <p className="text-zinc-600 mb-4">
               No appointments yet. Create your first appointment!
             </p>
             <button
               onClick={() => navigate('/appointments/new')}
-              className="bg-purple-600 hover:bg-purple-700 text-white font-medium py-2 px-4 rounded-lg transition-colors"
+              className="bg-[#4F7CEB] hover:bg-[#3E67CB] text-white font-medium py-2 px-4 rounded-lg transition-colors"
             >
               New Appointment
             </button>
@@ -97,18 +107,18 @@ export default function AppointmentsPage() {
             {sortedAppointments.map((appointment) => {
               const service = services.find(s => s.id === appointment.serviceId);
               const statusColors = {
-                scheduled: 'bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200',
-                completed: 'bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200',
-                cancelled: 'bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200',
+                scheduled: 'bg-blue-100 text-blue-800 ',
+                completed: 'bg-green-100  text-green-800 ',
+                cancelled: 'bg-red-100  text-red-800 ',
               };
               return (
-                <div key={appointment.id} className="bg-white dark:bg-zinc-900 rounded-lg shadow-md p-4 border border-zinc-200 dark:border-zinc-800">
+                <div key={appointment.id} className="bg-white rounded-lg shadow-md p-4 border border-zinc-200">
                   <div className="flex justify-between items-start mb-2">
                     <div>
-                      <h3 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">
+                      <h3 className="text-lg font-semibold text-zinc-900">
                         {service?.title} - {appointment.customerName}
                       </h3>
-                      <p className="text-sm text-zinc-600 dark:text-zinc-400">
+                      <p className="text-sm text-zinc-600">
                         {new Date(appointment.date).toLocaleDateString()} at {appointment.time}
                       </p>
                     </div>
@@ -122,7 +132,7 @@ export default function AppointmentsPage() {
                         {appointment.paymentStatus === 'paid' ? '✓ Paid' : 'Pending Payment'}
                       </span>
                       {appointment.paymentMethod && (
-                        <span className="text-zinc-600 dark:text-zinc-400 ml-2">
+                        <span className="text-zinc-600 ml-2">
                           ({appointment.paymentMethod})
                         </span>
                       )}
@@ -151,3 +161,6 @@ export default function AppointmentsPage() {
     </div>
   );
 }
+
+
+
