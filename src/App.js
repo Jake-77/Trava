@@ -1,3 +1,13 @@
+/**
+ * App - Main Application Router
+ *
+ * Sets up all routes for the application using React Router.
+ * Handles navigation between:
+ * - Dashboard and settings pages (authenticated)
+ * - Services management (list, create, edit, detail)
+ * - Appointments management (list, create, edit, detail)
+ * - Public pages (booking and payment pages for customers)
+ */
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import './globals.css';

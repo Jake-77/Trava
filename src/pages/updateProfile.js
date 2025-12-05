@@ -1,3 +1,33 @@
+/**
+ * Settings - User Settings Page
+ *
+ * Purpose:
+ * Allows users to update their profile settings including PayPal
+ * payment information and password.
+ *
+ * Features:
+ * - PayPal.me handle configuration (for receiving payments)
+ * - Password change functionality
+ * - Real-time password validation
+ *
+ * PayPal Settings:
+ * - Input field with paypal.me/ prefix
+ * - Can be left blank to remove payment links
+ * - Loads current handle on mount
+ *
+ * Password Change:
+ * - New password and confirm password fields
+ * - Real-time validation (shows error if passwords don't match)
+ * - Optional - can be left blank to keep current password
+ * - Clears fields on successful save
+ *
+ * User Flow:
+ * 1. User updates settings
+ * 2. Form validates password match (if provided)
+ * 3. Settings saved to backend
+ * 4. Success message displayed
+ * 5. Redirects to dashboard after 1 second
+ */
 import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { apiGetCurrentUser, apiUpdateProfile } from '../lib/storage';

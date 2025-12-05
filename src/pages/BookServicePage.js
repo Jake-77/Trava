@@ -1,3 +1,26 @@
+/**
+ * BookServicePage - Public Service Booking Page
+ *
+ * Purpose:
+ * Public-facing page where customers can book an appointment for a specific service.
+ * No authentication required - accessible via shareable booking link.
+ *
+ * Features:
+ * - Displays service information (title, description, price)
+ * - Customer information form (name, phone, email)
+ * - Date and time selection
+ * - Optional notes field
+ *
+ * Validation:
+ * - Prevents booking dates in the past
+ * - Required fields: name, phone, date, time
+ *
+ * User Flow:
+ * 1. Customer fills out booking form
+ * 2. Appointment created with 'scheduled' status and 'pending' payment
+ * 3. Success confirmation screen displayed
+ * 4. Customer can safely close the page
+ */
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { getServiceById, saveAppointment} from '../lib/storage';

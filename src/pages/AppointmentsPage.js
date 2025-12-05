@@ -1,3 +1,27 @@
+/**
+ * AppointmentsPage - Appointments List View
+ *
+ * Purpose:
+ * Displays a list of all user's appointments with filtering and sorting capabilities.
+ *
+ * Features:
+ * - Filter appointments by status (all, scheduled, completed, cancelled)
+ * - Chronological sorting (earliest first)
+ * - Status badges with color coding
+ * - Payment status indicators (paid/pending)
+ * - Service title and customer name display
+ *
+ * Display:
+ * - Each appointment shows: service, customer, date/time, status, payment status
+ * - Quick actions: view details or delete
+ * - Empty state with call-to-action when no appointments exist
+ *
+ * Actions:
+ * - Create new appointment button
+ * - Filter by status buttons
+ * - View appointment details
+ * - Delete appointment (with confirmation)
+ */
 import { useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { apiGetCurrentUser, getAppointments, deleteAppointment, getServices } from '../lib/storage';

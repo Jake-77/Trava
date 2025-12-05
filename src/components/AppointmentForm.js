@@ -1,3 +1,23 @@
+/**
+ * AppointmentForm - Create/Edit Appointment Form
+ *
+ * Purpose:
+ * Form component for creating new appointments or editing existing ones.
+ * Works in both create and edit modes based on whether an appointmentId is provided.
+ *
+ * Features:
+ * - Collects customer information (name, phone, email)
+ * - Service selection from user's available services
+ * - Date and time selection
+ * - Status management (scheduled/completed/cancelled)
+ * - Payment status and method tracking
+ * - Optional notes field
+ *
+ * Validation:
+ * - Requires user to have at least one service before creating appointments
+ * - Pre-fills all fields when editing an existing appointment
+ * - Validates user ownership of appointment before editing
+ */
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { saveAppointment, getAppointmentById, getServices, apiGetCurrentUser } from '../lib/storage';
