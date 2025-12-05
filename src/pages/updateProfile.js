@@ -29,7 +29,7 @@
  * 5. Redirects to dashboard after 1 second
  */
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { apiGetCurrentUser, apiUpdateProfile } from '../lib/storage';
 
 export default function Settings() {
@@ -94,7 +94,11 @@ export default function Settings() {
   };
 
   return (
+    <div className='min-h-screen bg-[#D9E1F2] dark:bg-[#1E293B]'>
     <div className="w-full max-w-md mx-auto p-6">
+      <Link to="/dashboard" className="text-black hover:text-zinc-700 text-sm">
+          ← Dashboard
+      </Link>
       <div className="bg-white dark:bg-zinc-900 rounded-lg shadow-lg p-8">
         <h1 className="text-2xl font-bold mb-6">Settings</h1>
 
@@ -171,8 +175,8 @@ export default function Settings() {
             disabled={loading}
             className={`w-full font-medium py-2 px-4 rounded-lg transition-colors ${
               loading
-                ? 'bg-purple-400 cursor-not-allowed'
-                : 'bg-purple-600 hover:bg-purple-700 text-white'
+                ? 'bg-[#1E3A74] cursor-not-allowed'
+                : 'bg-[#1E3A74] hover:bg-[#162B57] text-white'
             }`}
           >
             {loading ? 'Saving...' : 'Save Changes'}
@@ -188,5 +192,6 @@ export default function Settings() {
         </form>
       </div>
     </div>
+  </div>
   );
 }
