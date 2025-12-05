@@ -1,3 +1,16 @@
+"""
+Trava is a modern scheduling and payment platform for independent service providers such as cleaners, landscapers,
+ and auto detailers. It streamlines how clients book services, how business owners manage appointments,
+and how payments are processed — all in one simple interface. 
+Helping service providers stay organized and get paid quickly.
+"""
+
+"""
+Jobber, housecall pro are paid to use platforms where we aim to offer a simpler 
+free alternative supported through limited
+ads and an optioal paid subscription with aditional such as dashboard statistics.
+
+"""
 from flask import Flask, jsonify, request, session
 from flask_cors import CORS
 from werkzeug.security import generate_password_hash, check_password_hash
